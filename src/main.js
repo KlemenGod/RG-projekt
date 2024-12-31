@@ -31,15 +31,21 @@ await renderer.initialize();
 
 const scene = new Node();
 
-const camera = new Node();
-camera.addComponent(
+const cameraHolder = new Node();
+cameraHolder.addComponent(
   new Transform({
-    translation: [0, 1, 0],
+    translation: [0, 5, 10],
   })
 );
+cameraHolder.getComponentOfType(Transform).rotateX(-0.4);
+
+const camera = new Node();
 camera.addComponent(new Camera());
-camera.addComponent(new FirstPersonController(camera, canvas));
-scene.addChild(camera);
+cameraHolder.addChild(camera);
+
+
+
+scene.addChild(cameraHolder);
 
 const floor = new Node();
 floor.addComponent(
@@ -88,9 +94,9 @@ function resize({ displaySize: { width, height } }) {
 new ResizeSystem({ canvas, resize }).start();
 new UpdateSystem({ update, render }).start();
 
-const gui = new GUI();
-const controller = camera.getComponentOfType(FirstPersonController);
-gui.add(controller, "pointerSensitivity", 0.0001, 0.01);
-gui.add(controller, "maxSpeed", 0, 10);
-gui.add(controller, "decay", 0, 1);
-gui.add(controller, "acceleration", 1, 100);
+//const gui = new GUI();
+//const controller = camera.getComponentOfType(FirstPersonController);
+//gui.add(controller, "pointerSensitivity", 0.0001, 0.01);
+//gui.add(controller, "maxSpeed", 0, 10);
+//gui.add(controller, "decay", 0, 1);
+//gui.add(controller, "acceleration", 1, 100);
