@@ -5,7 +5,9 @@ import * as WebGPU from "engine/WebGPU.js";
 import { ResizeSystem } from "engine/systems/ResizeSystem.js";
 import { UpdateSystem } from "engine/systems/UpdateSystem.js";
 import { UnlitRenderer } from "engine/renderers/UnlitRenderer.js";
-import { FirstPersonController } from "engine/controllers/FirstPersonController.js";
+
+//custpm components
+import { CameraFollow } from "./customComponents/cameraFollow.js";
 
 import {
   Camera,
@@ -31,19 +33,33 @@ await renderer.initialize();
 
 const scene = new Node();
 
-const cameraHolder = new Node();
-cameraHolder.addComponent(
+const player = new Node();
+player.addComponent(
   new Transform({
-    translation: [0, 5, 10],
+    translation: [0, 0, 0],
   })
 );
-cameraHolder.getComponentOfType(Transform).rotateX(-0.4);
+scene.addChild(player);
+
+const cameraHolder = new Node();
+cameraHolder.addComponent(new Transform());
+cameraHolder.addComponent(
+  new CameraFollow(
+    player.getComponentOfType(Transform),
+    cameraHolder.getComponentOfType(Transform),
+    {
+      offset: [0, 5, 10],
+      lookAngle: 0.3,
+    }
+  )
+);
+console.log(cameraHolder);
+//cameraHolder.getComponentOfType(Transform).rotateX(-0.4);
 
 const camera = new Node();
+camera.addComponent(new Transform());
 camera.addComponent(new Camera());
 cameraHolder.addChild(camera);
-
-
 
 scene.addChild(cameraHolder);
 
