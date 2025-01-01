@@ -5,6 +5,7 @@ import * as WebGPU from "engine/WebGPU.js";
 import { ResizeSystem } from "engine/systems/ResizeSystem.js";
 import { UpdateSystem } from "engine/systems/UpdateSystem.js";
 import { UnlitRenderer } from "engine/renderers/UnlitRenderer.js";
+
 import { FirstPersonController } from "engine/controllers/FirstPersonController.js";
 
 import {
@@ -25,6 +26,11 @@ const resources = await loadResources({
   image: new URL("scene/models/floor/grass.png", import.meta.url),
 });
 
+const zombieRes = await loadResources({
+    mesh: new URL("scene/models/zombie/zombie.obj", import.meta.url),
+    image: new URL("scene/models/zombie/zombie.png", import.meta.url),
+});
+
 const canvas = document.querySelector("canvas");
 const renderer = new UnlitRenderer(canvas);
 await renderer.initialize();
@@ -35,6 +41,7 @@ const cameraHolder = new Node();
 cameraHolder.addComponent(
   new Transform({
     translation: [0, 5, 10],
+
   })
 );
 cameraHolder.getComponentOfType(Transform).rotateX(-0.4);
@@ -46,6 +53,7 @@ cameraHolder.addChild(camera);
 
 
 scene.addChild(cameraHolder);
+
 
 const floor = new Node();
 floor.addComponent(
@@ -74,6 +82,37 @@ floor.addComponent(
   })
 );
 scene.addChild(floor);
+
+const zombie = new Node();
+zombie.addComponent(
+    new Transform({
+        translation: [1,1,10],
+        scale: [3,3,3],   
+    })
+);
+
+zombie.addComponent(
+    new Model({
+      primitives: [
+        new Primitive({
+          mesh: zombieRes.mesh,
+          material: new Material({
+            baseTexture: new Texture({
+              image: zombieRes.image,
+              sampler: new Sampler({
+                minFilter: "nearest",
+                magFilter: "nearest",
+                addressModeU: "repeat",
+                addressModeV: "repeat",
+              }),
+            }),
+          }),
+        }),
+      ],
+    })
+  );
+scene.addChild(zombie);
+
 
 function update(t, dt) {
   scene.traverse((node) => {
