@@ -8,6 +8,7 @@ import { UnlitRenderer } from "engine/renderers/UnlitRenderer.js";
 
 //custpm components
 import { CameraFollow } from "./customComponents/cameraFollow.js";
+import { PlayerMovement } from "./customComponents/playerMovement.js";
 
 import {
   Camera,
@@ -39,6 +40,7 @@ player.addComponent(
     translation: [0, 0, 0],
   })
 );
+player.addComponent(new PlayerMovement(canvas, player));
 scene.addChild(player);
 
 const cameraHolder = new Node();
@@ -53,8 +55,6 @@ cameraHolder.addComponent(
     }
   )
 );
-console.log(cameraHolder);
-//cameraHolder.getComponentOfType(Transform).rotateX(-0.4);
 
 const camera = new Node();
 camera.addComponent(new Transform());
