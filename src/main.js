@@ -10,6 +10,10 @@ import { UnlitRenderer } from "engine/renderers/UnlitRenderer.js";
 import { CameraFollow } from "./customComponents/cameraFollow.js";
 import { PlayerMovement } from "./customComponents/playerMovement.js";
 import { RotateObject } from "./customComponents/rotateObject.js";
+import {
+  calculateAxisAlignedBoundingBox,
+  mergeAxisAlignedBoundingBoxes,
+} from "engine/core/MeshUtils.js";
 
 import {
   Camera,
@@ -23,6 +27,7 @@ import {
 } from "engine/core.js";
 
 import { loadResources } from "engine/loaders/resources.js";
+import { Physics } from "./Physics.js";
 
 const resources = await loadResources({
   mesh: new URL("scene/models/floor/floor.json", import.meta.url),
@@ -33,11 +38,17 @@ const playerRes = await loadResources({
   image: new URL("models/player/playerTexture.png", import.meta.url),
 });
 
+const arenaRes = await loadResources({
+  mesh: new URL("models/arena/arena.obj", import.meta.url),
+  image: new URL("scene/models/floor/grass.png", import.meta.url),
+});
+
 const canvas = document.querySelector("canvas");
 const renderer = new UnlitRenderer(canvas);
 await renderer.initialize();
 
 const scene = new Node();
+const physics = new Physics(scene);
 
 const player = new Node();
 player.addComponent(new Transform());
@@ -69,6 +80,7 @@ player.addComponent(
 );
 
 player.addComponent(new PlayerMovement(canvas, player));
+player.isDynamic = true;
 scene.addChild(player);
 
 const cameraHolder = new Node();
@@ -119,12 +131,47 @@ floor.addComponent(
 );
 scene.addChild(floor);
 
+const arena = new Node();
+
+arena.isStatic = true;
+arena.addComponent(new Transform({ translation: [0, 0, 0], scale: [3, 3, 3] }));
+arena.addComponent(
+  new Model({
+    primitives: [
+      new Primitive({
+        mesh: arenaRes.mesh,
+        material: new Material({
+          baseTexture: new Texture({
+            image: arenaRes.image,
+            sampler: new Sampler(),
+          }),
+        }),
+      }),
+    ],
+  })
+);
+scene.addChild(arena);
+
+scene.traverse((node) => {
+  const model = node.getComponentOfType(Model);
+  if (!model) {
+    return;
+  }
+
+  const boxes = model.primitives.map((primitive) =>
+    calculateAxisAlignedBoundingBox(primitive.mesh)
+  );
+  node.aabb = mergeAxisAlignedBoundingBoxes(boxes);
+});
+
 function update(t, dt) {
   scene.traverse((node) => {
     for (const component of node.components) {
       component.update?.(t, dt);
     }
   });
+
+  physics.update(t, dt);
 }
 
 function render() {
