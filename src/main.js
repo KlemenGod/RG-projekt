@@ -8,6 +8,8 @@ import { UnlitRenderer } from "engine/renderers/UnlitRenderer.js";
 
 import { FirstPersonController } from "engine/controllers/FirstPersonController.js";
 
+import { ZombieMovement} from "./customComponents/zombieMovement.js";
+
 import {
   Camera,
   Material,
@@ -18,6 +20,7 @@ import {
   Texture,
   Transform,
 } from "engine/core.js";
+
 
 import { loadResources } from "engine/loaders/resources.js";
 
@@ -82,38 +85,52 @@ floor.addComponent(
   })
 );
 scene.addChild(floor);
-
-const zombie = new Node();
-zombie.addComponent(
-    new Transform({
-        translation: [1,1,10],
-        scale: [3,3,3],   
-    })
-);
-
-zombie.addComponent(
-    new Model({
-      primitives: [
-        new Primitive({
-          mesh: zombieRes.mesh,
-          material: new Material({
-            baseTexture: new Texture({
-              image: zombieRes.image,
-              sampler: new Sampler({
-                minFilter: "nearest",
-                magFilter: "nearest",
-                addressModeU: "repeat",
-                addressModeV: "repeat",
+let zombies = new Node();
+let n = 4;
+let x = -1;
+for(let i=0; i < n; i++){
+  const zombie = new Node();
+  zombie.addComponent(
+      new Transform({
+          translation: [x,1,10],
+          scale: [3,3,3],   
+      })
+  );
+  
+  zombie.addComponent(
+      new Model({
+        primitives: [
+          new Primitive({
+            mesh: zombieRes.mesh,
+            material: new Material({
+              baseTexture: new Texture({
+                image: zombieRes.image,
+                sampler: new Sampler({
+                  minFilter: "nearest",
+                  magFilter: "nearest",
+                  addressModeU: "repeat",
+                  addressModeV: "repeat",
+                }),
               }),
             }),
           }),
-        }),
-      ],
-    })
-  );
-scene.addChild(zombie);
+        ],
+      })
+    );
+  zombie.addComponent(new ZombieMovement(canvas,zombie));
+  zombies.addChild(zombie);
+  x++;
+}
+scene.addChild(zombies);
 
 
+function deleteZombie(index){
+  const child = zombies.children[index];
+  if(child){
+    child.destroy();
+    zombies.removeChild(child);
+  }
+}
 function update(t, dt) {
   scene.traverse((node) => {
     for (const component of node.components) {

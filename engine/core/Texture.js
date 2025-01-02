@@ -17,5 +17,8 @@ export class Texture {
     get height() {
         return this.image.height;
     }
-
+    destroy(){
+        this.imagee = null
+        this.sampler = null
+    }
 }
