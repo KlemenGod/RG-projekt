@@ -6,7 +6,10 @@ import { ResizeSystem } from "engine/systems/ResizeSystem.js";
 import { UpdateSystem } from "engine/systems/UpdateSystem.js";
 import { UnlitRenderer } from "engine/renderers/UnlitRenderer.js";
 
-import { FirstPersonController } from "engine/controllers/FirstPersonController.js";
+//custpm components
+import { CameraFollow } from "./customComponents/cameraFollow.js";
+import { PlayerMovement } from "./customComponents/playerMovement.js";
+import { RotateObject } from "./customComponents/rotateObject.js";
 
 import { ZombieMovement} from "./customComponents/zombieMovement.js";
 
@@ -28,6 +31,10 @@ const resources = await loadResources({
   mesh: new URL("scene/models/floor/floor.json", import.meta.url),
   image: new URL("scene/models/floor/grass.png", import.meta.url),
 });
+const playerRes = await loadResources({
+  mesh: new URL("models/player/player.obj", import.meta.url),
+  image: new URL("models/player/playerTexture.png", import.meta.url),
+});
 
 const zombieRes = await loadResources({
     mesh: new URL("scene/models/zombie/zombie.obj", import.meta.url),
@@ -40,20 +47,55 @@ await renderer.initialize();
 
 const scene = new Node();
 
-const cameraHolder = new Node();
-cameraHolder.addComponent(
+const player = new Node();
+player.addComponent(new Transform());
+player.addComponent(
   new Transform({
-    translation: [0, 5, 10],
-
+    translation: [0, 0, 0],
+    scale: [3, 3, 3],
   })
 );
-cameraHolder.getComponentOfType(Transform).rotateX(-0.4);
+player.addComponent(
+  new Model({
+    primitives: [
+      new Primitive({
+        mesh: playerRes.mesh,
+        material: new Material({
+          baseTexture: new Texture({
+            image: playerRes.image,
+            sampler: new Sampler({
+              minFilter: "nearest",
+              magFilter: "nearest",
+              addressModeU: "repeat",
+              addressModeV: "repeat",
+            }),
+          }),
+        }),
+      }),
+    ],
+  })
+);
+
+player.addComponent(new PlayerMovement(canvas, player));
+scene.addChild(player);
+
+const cameraHolder = new Node();
+cameraHolder.addComponent(new Transform());
+cameraHolder.addComponent(
+  new CameraFollow(
+    player.getComponentOfType(Transform),
+    cameraHolder.getComponentOfType(Transform),
+    {
+      offset: [0, 5, 6],
+      lookAngle: -40,
+    }
+  )
+);
 
 const camera = new Node();
+camera.addComponent(new Transform());
 camera.addComponent(new Camera());
 cameraHolder.addChild(camera);
-
-
 
 scene.addChild(cameraHolder);
 
