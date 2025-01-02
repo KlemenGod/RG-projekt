@@ -1,4 +1,4 @@
-import { vec3, vec4 } from "glm";
+import { vec3, quat } from "glm";
 
 export class CameraFollow {
   constructor(player, transform, { offset = [0, 0, 0], lookAngle = 0 } = {}) {
@@ -11,7 +11,7 @@ export class CameraFollow {
   }
 
   start() {
-    this.transform.rotation[0] = -this.lookAngle;
+    quat.fromEuler(this.transform.rotation, this.lookAngle, 0, 0);
   }
 
   update(t, dt) {
