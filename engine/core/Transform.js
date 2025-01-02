@@ -1,4 +1,4 @@
-import { mat4 } from "glm";
+import { mat4, quat } from "glm";
 
 export class Transform {
   constructor({
@@ -17,9 +17,6 @@ export class Transform {
 
   setRotation(x, y, z, w) {
     this.rotation = [x, y, z, w];
-  }
-  rotateX(angle) {
-    this.rotation[0] += angle;
   }
 
   get matrix() {
