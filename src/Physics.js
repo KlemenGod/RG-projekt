@@ -14,7 +14,6 @@ export class Physics {
           if (node !== other && other.isStatic) {
             this.resolveCollision(node, other);
           }
-          
         });
       }
     });
@@ -76,13 +75,12 @@ export class Physics {
     const aBox = this.getTransformedAABB(a);
     const bBox = this.getTransformedAABB(b);
 
-    console.log(aBox, bBox);
     // Check if there is collision.
     const isColliding = this.aabbIntersection(aBox, bBox);
     if (!isColliding) {
       return;
     }
-    console.log("Collision detected!");
+
     // Move node A minimally to avoid collision.
     const diffa = vec3.sub(vec3.create(), bBox.max, aBox.min);
     const diffb = vec3.sub(vec3.create(), aBox.max, bBox.min);

@@ -1,6 +1,6 @@
 {
 	"asset":{
-		"generator":"Khronos glTF Blender I/O v3.6.27",
+		"generator":"Khronos glTF Blender I/O v4.3.47",
 		"version":"2.0"
 	},
 	"scene":0,
@@ -21,37 +21,32 @@
 			"mesh":0,
 			"name":"Plane",
 			"scale":[
-				2.9691712856292725,
-				2.9691712856292725,
-				2.9691712856292725
+				14.463512420654297,
+				14.463512420654297,
+				14.463512420654297
+			],
+			"translation":[
+				0.004605080466717482,
+				-0.29167047142982483,
+				-0.01722756400704384
 			]
 		},
 		{
 			"mesh":1,
 			"name":"Cube",
-			"scale":[
-				2.9700584411621094,
-				0.09782826900482178,
-				0.07207627594470978
-			],
 			"translation":[
-				0,
-				0.09043796360492706,
-				2.856271266937256
+				-13.278499603271484,
+				0.6430739164352417,
+				-13.457829475402832
 			]
 		},
 		{
 			"mesh":2,
 			"name":"Cube.001",
-			"scale":[
-				2.9700584411621094,
-				0.09782826900482178,
-				0.07207627594470978
-			],
 			"translation":[
-				0,
-				0.09043796360492706,
-				-2.862863063812256
+				-13.278499603271484,
+				0.6430739164352417,
+				13.353763580322266
 			]
 		},
 		{
@@ -63,15 +58,10 @@
 				0,
 				0.7071068286895752
 			],
-			"scale":[
-				2.9700584411621094,
-				0.09782826900482178,
-				0.07207627594470978
-			],
 			"translation":[
-				-2.912111282348633,
-				0.10248260200023651,
-				0.014421284198760986
+				13.20608139038086,
+				0.5055705904960632,
+				13.49976634979248
 			]
 		},
 		{
@@ -83,16 +73,68 @@
 				0,
 				0.7071068286895752
 			],
-			"scale":[
-				2.9700584411621094,
-				0.09782826900482178,
-				0.07207627594470978
-			],
 			"translation":[
-				2.906163454055786,
-				0.09335711598396301,
-				0.014421284198760986
+				-13.605510711669922,
+				0.6797214150428772,
+				13.499767303466797
 			]
+		}
+	],
+	"materials":[
+		{
+			"doubleSided":true,
+			"name":"Material.001",
+			"pbrMetallicRoughness":{
+				"baseColorTexture":{
+					"index":0
+				},
+				"metallicFactor":0,
+				"roughnessFactor":0.5
+			}
+		},
+		{
+			"doubleSided":true,
+			"name":"Wall",
+			"pbrMetallicRoughness":{
+				"baseColorTexture":{
+					"index":1
+				},
+				"metallicFactor":0,
+				"roughnessFactor":0.5
+			}
+		},
+		{
+			"doubleSided":true,
+			"name":"Wall.001",
+			"pbrMetallicRoughness":{
+				"baseColorTexture":{
+					"index":2
+				},
+				"metallicFactor":0,
+				"roughnessFactor":0.5
+			}
+		},
+		{
+			"doubleSided":true,
+			"name":"Wall.002",
+			"pbrMetallicRoughness":{
+				"baseColorTexture":{
+					"index":3
+				},
+				"metallicFactor":0,
+				"roughnessFactor":0.5
+			}
+		},
+		{
+			"doubleSided":true,
+			"name":"Wall.003",
+			"pbrMetallicRoughness":{
+				"baseColorTexture":{
+					"index":4
+				},
+				"metallicFactor":0,
+				"roughnessFactor":0.5
+			}
 		}
 	],
 	"meshes":[
@@ -105,12 +147,13 @@
 						"NORMAL":1,
 						"TEXCOORD_0":2
 					},
-					"indices":3
+					"indices":3,
+					"material":0
 				}
 			]
 		},
 		{
-			"name":"Cube.001",
+			"name":"Cube.005",
 			"primitives":[
 				{
 					"attributes":{
@@ -118,12 +161,13 @@
 						"NORMAL":5,
 						"TEXCOORD_0":6
 					},
-					"indices":7
+					"indices":7,
+					"material":1
 				}
 			]
 		},
 		{
-			"name":"Cube.002",
+			"name":"Cube.006",
 			"primitives":[
 				{
 					"attributes":{
@@ -131,12 +175,13 @@
 						"NORMAL":9,
 						"TEXCOORD_0":10
 					},
-					"indices":7
+					"indices":7,
+					"material":2
 				}
 			]
 		},
 		{
-			"name":"Cube.003",
+			"name":"Cube.007",
 			"primitives":[
 				{
 					"attributes":{
@@ -144,12 +189,13 @@
 						"NORMAL":12,
 						"TEXCOORD_0":13
 					},
-					"indices":7
+					"indices":7,
+					"material":3
 				}
 			]
 		},
 		{
-			"name":"Cube.004",
+			"name":"Cube.008",
 			"primitives":[
 				{
 					"attributes":{
@@ -157,9 +203,44 @@
 						"NORMAL":15,
 						"TEXCOORD_0":16
 					},
-					"indices":7
+					"indices":7,
+					"material":4
 				}
 			]
+		}
+	],
+	"textures":[
+		{
+			"sampler":0,
+			"source":0
+		},
+		{
+			"sampler":1,
+			"source":1
+		},
+		{
+			"sampler":1,
+			"source":1
+		},
+		{
+			"sampler":1,
+			"source":1
+		},
+		{
+			"sampler":1,
+			"source":1
+		}
+	],
+	"images":[
+		{
+			"mimeType":"image/jpeg",
+			"name":"woodTexture",
+			"uri":"woodTexture.jpg"
+		},
+		{
+			"mimeType":"image/jpeg",
+			"name":"polished-concrete-3000-mm-architextures",
+			"uri":"polished-concrete-3000-mm-architextures.jpg"
 		}
 	],
 	"accessors":[
@@ -202,7 +283,7 @@
 			"componentType":5126,
 			"count":24,
 			"max":[
-				1,
+				27.662200927734375,
 				1,
 				1
 			],
@@ -236,7 +317,7 @@
 			"componentType":5126,
 			"count":24,
 			"max":[
-				1,
+				27.662200927734375,
 				1,
 				1
 			],
@@ -264,7 +345,7 @@
 			"componentType":5126,
 			"count":24,
 			"max":[
-				1,
+				27.662200927734375,
 				1,
 				1
 			],
@@ -292,7 +373,7 @@
 			"componentType":5126,
 			"count":24,
 			"max":[
-				1,
+				27.662200927734375,
 				1,
 				1
 			],
@@ -418,6 +499,16 @@
 			"byteLength":192,
 			"byteOffset":3092,
 			"target":34962
+		}
+	],
+	"samplers":[
+		{
+			"magFilter":9729,
+			"minFilter":9987
+		},
+		{
+			"magFilter":9728,
+			"minFilter":9984
 		}
 	],
 	"buffers":[
