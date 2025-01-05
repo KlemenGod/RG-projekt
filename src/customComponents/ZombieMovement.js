@@ -5,20 +5,27 @@ export class ZombieMovement {
   constructor(
     domElement,
     node,
+    player,
+    transform,
     {
       velocity = [0, 0, 0],
       acceleration = 30,
-      maxSpeed = 2,
+      maxSpeed = 1,
       decay = 0.99999,
+      targetPos = null,
     } = {}
   ) {
     this.node = node;
     this.domElement = domElement;
+    this.player = player;
+    this.transform = transform;
 
     this.velocity = velocity;
     this.acceleration = acceleration;
     this.maxSpeed = maxSpeed;
     this.decay = decay;
+    this.targetPos = targetPos;
+   
   }
 
   update(t, dt) {
@@ -27,40 +34,48 @@ export class ZombieMovement {
     const sin = Math.sin(this.yaw);
     const forward = [0, 0, 1];
     const right = [1, 0, 0];
+    const offset = [-0.45,0,-2.3];
+    
 
     // Map user input to the acceleration vector.
-    const acc = vec3.create();
+    const dir = vec3.create();
 
-
-    vec3.sub(acc, acc, forward);
+    const playerVec = vec3.fromValues(
+      this.player.translation[0],
+      this.player.translation[1],
+      this.player.translation[2]
+    );
     
+  
+
+    vec3.sub(dir,playerVec,this.transform.translation);
+    vec3.normalize(dir,dir);
+    vec3.scaleAndAdd(this.velocity, this.velocity, dir, dt * this.acceleration);
+  
+    if(vec3.distance(this.transform.translation,playerVec) <= 0.1){
+      const decay = Math.exp(dt * Math.log(1 - this.decay));
+      vec3.scale(this.velocity, this.velocity, decay);
+    }
+    vec3.scaleAndAdd(
+      this.transform.translation,
+      this.transform.translation,
+      this.velocity,
+      dt
+    );
+    const zombieforward = vec3.fromValues(0,0,-1);
+    const rotation = quat.create();
+    quat.rotationTo(rotation,zombieforward,dir);
+
+    this.transform.rotation = rotation;
+
     // Update velocity based on acceleration.
-    vec3.scaleAndAdd(this.velocity, this.velocity, acc, dt * this.acceleration);
-
     
-
     // Limit speed to prevent accelerating to infinity and beyond.
     const speed = vec3.length(this.velocity);
     if (speed > this.maxSpeed) {
       vec3.scale(this.velocity, this.velocity, this.maxSpeed / speed);
     }
 
-    const transform = this.node.getComponentOfType(Transform);
-    if (transform) {
-      // Update translation based on velocity.
-      vec3.scaleAndAdd(
-        transform.translation,
-        transform.translation,
-        this.velocity,
-        dt
-      );
-
-      // Update rotation based on the Euler angles.
-      // const rotation = quat.create();
-      // quat.rotateY(rotation, rotation, this.yaw);
-      // quat.rotateX(rotation, rotation, this.pitch);
-      // transform.rotation = rotation;
-    }
   }
   
 }

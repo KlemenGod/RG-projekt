@@ -37,7 +37,7 @@ const playerRes = await loadResources({
 });
 
 const zombieRes = await loadResources({
-    mesh: new URL("scene/models/zombie/zombie.obj", import.meta.url),
+    mesh: new URL("models/player/player.obj", import.meta.url),
     image: new URL("scene/models/zombie/zombie.png", import.meta.url),
 });
 
@@ -127,18 +127,31 @@ floor.addComponent(
   })
 );
 scene.addChild(floor);
+let spawnpoints = {
+  0: {translation: [-10,0,2], rotation: [0,-0.7071,0,0.7071]}, //leva stran mape
+  1: {translation: [10,0,2], rotation: [0,0.7071,0,0.7071]}, // desna stran mape
+  2: {translation: [0,0,-10], rotation: [0,1,0,0]}, // zgornja stran
+  3: {translation: [0,0,10], rotation: [0,0,0,0]}, // spodnja stran                                                      
+}
 let zombies = new Node();
 let n = 4;
-let x = -1;
+let spawnoffset = 1;
+let spawnloactions = [];
 for(let i=0; i < n; i++){
   const zombie = new Node();
+  let spawnpoint = Math.floor(Math.random() * (3-0 + 1) + 0);
+  if(spawnloactions.includes(spawnpoint)){
+    spawnoffset++; 
+  }
   zombie.addComponent(
       new Transform({
-          translation: [x,1,10],
-          scale: [3,3,3],   
+          translation: [spawnpoints[spawnpoint].translation[0] + spawnoffset,spawnpoints[spawnpoint].translation[1],spawnpoints[spawnpoint].translation[2]],
+          scale: [3,3,3],
+          rotation: spawnpoints[spawnpoint].rotation,   
       })
   );
-  
+  spawnloactions.push(spawnpoint);
+
   zombie.addComponent(
       new Model({
         primitives: [
@@ -159,9 +172,8 @@ for(let i=0; i < n; i++){
         ],
       })
     );
-  zombie.addComponent(new ZombieMovement(canvas,zombie));
+  zombie.addComponent(new ZombieMovement(canvas,zombie,player.getComponentOfType(Transform),zombie.getComponentOfType(Transform),));
   zombies.addChild(zombie);
-  x++;
 }
 scene.addChild(zombies);
 
