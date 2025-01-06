@@ -9,7 +9,12 @@ import { UnlitRenderer } from "engine/renderers/UnlitRenderer.js";
 //custpm components
 import { CameraFollow } from "./customComponents/cameraFollow.js";
 import { PlayerMovement } from "./customComponents/playerMovement.js";
+import { PlayerControls } from "./customComponents/playerControls.js";
+
 import { RotateObject } from "./customComponents/rotateObject.js";
+import { ZombieMovement} from "./customComponents/zombieMovement.js";
+import { Weapon } from "./customComponents/Weapon.js";
+
 import {
   calculateAxisAlignedBoundingBox,
   mergeAxisAlignedBoundingBoxes,
@@ -25,8 +30,7 @@ import {
   Texture,
   Transform,
 } from "engine/core.js";
-
-
+import { GLTFLoader } from "engine/loaders/GLTFLoader.js";
 import { loadResources } from "engine/loaders/resources.js";
 import { Physics } from "./Physics.js";
 
@@ -39,6 +43,14 @@ const zombieRes = await loadResources({
     mesh: new URL("models/player/player.obj", import.meta.url),
     image: new URL("scene/models/zombie/zombie.png", import.meta.url),
 });
+const gunRes = await loadResources({
+  mesh: new URL("models/gun/gun.obj", import.meta.url),
+  image: new URL("models/gun/gun_texture.png", import.meta.url),
+});
+const bulletRes = await loadResources({
+  mesh: new URL("models/bullet/bullet.obj", import.meta.url),
+  image: new URL("models/bullet/bullet.png", import.meta.url),
+});
 
 const canvas = document.querySelector("canvas");
 const renderer = new UnlitRenderer(canvas);
@@ -46,6 +58,7 @@ await renderer.initialize();
 
 const loader = new GLTFLoader();
 await loader.load(new URL("scene/scene/scene.gltf", import.meta.url));
+
 
 const scene = loader.loadScene(loader.defaultScene);
 const physics = new Physics(scene);
@@ -78,9 +91,43 @@ player.addComponent(
   })
 );
 
-player.addComponent(new PlayerMovement(canvas, player));
+player.addComponent(new PlayerControls(canvas));
+player.addComponent(new PlayerMovement(player,player.getComponentOfType(PlayerControls)));
+
 player.isDynamic = true;
+const gun = new Node();
+gun.addComponent(
+    new Transform({
+      translation: [0,0,0],
+      scale: [3,3,3]
+    })
+)
+gun.addComponent(
+  new Model({
+    primitives: [
+      new Primitive({
+        mesh: gunRes.mesh,
+        material: new Material({
+          baseTexture: new Texture({
+            image: gunRes.image,
+            sampler: new Sampler({
+              minFilter: "nearest",
+              magFilter: "nearest",
+              addressModeU: "repeat",
+              addressModeV: "repeat",
+            }),
+          }),
+        }),
+      }),
+    ],
+  })
+);
+console.log(scene);
+gun.addComponent(new Weapon(player.getComponentOfType(Transform),gun.getComponentOfType(Transform),player.getComponentOfType(PlayerControls),bulletRes,scene));
+
 scene.addChild(player);
+scene.addChild(gun);
+
 
 const cameraHolder = new Node();
 cameraHolder.addComponent(new Transform());
@@ -108,17 +155,7 @@ loader.loadNode("Cube.002").isStatic = true;
 loader.loadNode("Cube.003").isStatic = true;
 loader.loadNode("Plane").isStatic = true;
 
-scene.traverse((node) => {
-  const model = node.getComponentOfType(Model);
-  if (!model) {
-    return;
-  }
 
-  const boxes = model.primitives.map((primitive) =>
-    calculateAxisAlignedBoundingBox(primitive.mesh)
-  );
-  node.aabb = mergeAxisAlignedBoundingBoxes(boxes);
-});
 let spawnpoints = {
   0: {translation: [-10,0,2], rotation: [0,-0.7071,0,0.7071]}, //leva stran mape
   1: {translation: [10,0,2], rotation: [0,0.7071,0,0.7071]}, // desna stran mape
@@ -126,6 +163,7 @@ let spawnpoints = {
   3: {translation: [0,0,10], rotation: [0,0,0,0]}, // spodnja stran                                                      
 }
 let zombies = new Node();
+
 let n = 4;
 let spawnoffset = 1;
 let spawnloactions = [];
@@ -165,9 +203,23 @@ for(let i=0; i < n; i++){
       })
     );
   zombie.addComponent(new ZombieMovement(canvas,zombie,player.getComponentOfType(Transform),zombie.getComponentOfType(Transform),));
+  zombie.isDynamic = true;
   zombies.addChild(zombie);
 }
 scene.addChild(zombies);
+
+
+scene.traverse((node) => {
+  const model = node.getComponentOfType(Model);
+  if (!model) {
+    return;
+  }
+
+  const boxes = model.primitives.map((primitive) =>
+    calculateAxisAlignedBoundingBox(primitive.mesh)
+  );
+  node.aabb = mergeAxisAlignedBoundingBoxes(boxes);
+});
 
 
 function deleteZombie(index){

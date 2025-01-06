@@ -1,29 +1,26 @@
 import { quat, vec3, mat4 } from "glm";
 import { Transform } from "../../engine/core/Transform.js";
 
-export class ZombieMovement {
+export class Bullet {
   constructor(
-    domElement,
     node,
     player,
     transform,
     {
       velocity = [0, 0, 0],
       acceleration = 30,
-      maxSpeed = 1,
-      decay = 0.99999,
+      maxSpeed = 2,
+      hit = false,
       targetPos = null,
     } = {}
   ) {
     this.node = node;
-    this.domElement = domElement;
     this.player = player;
     this.transform = transform;
 
     this.velocity = velocity;
     this.acceleration = acceleration;
     this.maxSpeed = maxSpeed;
-    this.decay = decay;
     this.targetPos = targetPos;
    
   }
@@ -47,28 +44,17 @@ export class ZombieMovement {
     );
     
   
-
-    vec3.sub(dir,playerVec,this.transform.translation);
-    vec3.normalize(dir,dir);
+    
+    this.transform.translation[2] -= 0.043;
     vec3.scaleAndAdd(this.velocity, this.velocity, dir, dt * this.acceleration);
   
-    if(vec3.distance(this.transform.translation,playerVec) <= 0.4){
-      const decay = Math.exp(dt * Math.log(1 - this.decay));
-      vec3.scale(this.velocity, this.velocity, decay);
-    }
     vec3.scaleAndAdd(
       this.transform.translation,
       this.transform.translation,
       this.velocity,
       dt
     );
-    const zombieforward = vec3.fromValues(0,0,-1);
-    const rotation = quat.create();
-    quat.rotationTo(rotation,zombieforward,dir);
-
-    this.transform.rotation = rotation;
-
-    // Update velocity based on acceleration.
+ 
     
     // Limit speed to prevent accelerating to infinity and beyond.
     const speed = vec3.length(this.velocity);

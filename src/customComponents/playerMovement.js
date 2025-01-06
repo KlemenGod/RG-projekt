@@ -3,8 +3,8 @@ import { Transform } from "../../engine/core/Transform.js";
 
 export class PlayerMovement {
   constructor(
-    domElement,
     node,
+    playerControls,
     {
       velocity = [0, 0, 0],
       acceleration = 50,
@@ -13,29 +13,14 @@ export class PlayerMovement {
     } = {}
   ) {
     this.node = node;
-    this.domElement = domElement;
-
-    this.keys = {};
+    this.playerControls = playerControls;
 
     this.velocity = velocity;
     this.acceleration = acceleration;
     this.maxSpeed = maxSpeed;
     this.decay = decay;
 
-    this.initHandlers();
   }
-
-  initHandlers() {
-    this.keydownHandler = this.keydownHandler.bind(this);
-    this.keyupHandler = this.keyupHandler.bind(this);
-
-    const element = this.domElement;
-    const doc = element.ownerDocument;
-
-    doc.addEventListener("keydown", this.keydownHandler);
-    doc.addEventListener("keyup", this.keyupHandler);
-  }
-
   update(t, dt) {
     // Calculate forward and right vectors.
     const cos = Math.cos(this.yaw);
@@ -45,16 +30,16 @@ export class PlayerMovement {
 
     // Map user input to the acceleration vector.
     const acc = vec3.create();
-    if (this.keys["KeyW"]) {
+    if (this.playerControls.keys["KeyW"]) {
       vec3.sub(acc, acc, forward);
     }
-    if (this.keys["KeyS"]) {
+    if (this.playerControls.keys["KeyS"]) {
       vec3.add(acc, acc, forward);
     }
-    if (this.keys["KeyD"]) {
+    if (this.playerControls.keys["KeyD"]) {
       vec3.add(acc, acc, right);
     }
-    if (this.keys["KeyA"]) {
+    if (this.playerControls.keys["KeyA"]) {
       vec3.sub(acc, acc, right);
     }
 
@@ -63,10 +48,10 @@ export class PlayerMovement {
 
     // If there is no user input, apply decay.
     if (
-      !this.keys["KeyW"] &&
-      !this.keys["KeyS"] &&
-      !this.keys["KeyD"] &&
-      !this.keys["KeyA"]
+      !this.playerControls.keys["KeyW"] &&
+      !this.playerControls.keys["KeyS"] &&
+      !this.playerControls.keys["KeyD"] &&
+      !this.playerControls.keys["KeyA"]
     ) {
       const decay = Math.exp(dt * Math.log(1 - this.decay));
       vec3.scale(this.velocity, this.velocity, decay);
@@ -94,13 +79,5 @@ export class PlayerMovement {
       // quat.rotateX(rotation, rotation, this.pitch);
       // transform.rotation = rotation;
     }
-  }
-
-  keydownHandler(e) {
-    this.keys[e.code] = true;
-  }
-
-  keyupHandler(e) {
-    this.keys[e.code] = false;
   }
 }

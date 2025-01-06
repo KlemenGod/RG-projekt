@@ -11,7 +11,7 @@ export class Physics {
     this.scene.traverse((node) => {
       if (node.isDynamic) {
         this.scene.traverse((other) => {
-          if (node !== other && other.isStatic) {
+          if (node !== other && (other.isStatic || other.isDynamic)) {
             this.resolveCollision(node, other);
           }
         });
