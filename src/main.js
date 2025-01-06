@@ -10,8 +10,10 @@ import { UnlitRenderer } from "engine/renderers/UnlitRenderer.js";
 import { CameraFollow } from "./customComponents/cameraFollow.js";
 import { PlayerMovement } from "./customComponents/playerMovement.js";
 import { RotateObject } from "./customComponents/rotateObject.js";
-
-import { ZombieMovement} from "./customComponents/zombieMovement.js";
+import {
+  calculateAxisAlignedBoundingBox,
+  mergeAxisAlignedBoundingBoxes,
+} from "engine/core/MeshUtils.js";
 
 import {
   Camera,
@@ -26,11 +28,8 @@ import {
 
 
 import { loadResources } from "engine/loaders/resources.js";
+import { Physics } from "./Physics.js";
 
-const resources = await loadResources({
-  mesh: new URL("scene/models/floor/floor.json", import.meta.url),
-  image: new URL("scene/models/floor/grass.png", import.meta.url),
-});
 const playerRes = await loadResources({
   mesh: new URL("models/player/player.obj", import.meta.url),
   image: new URL("models/player/playerTexture.png", import.meta.url),
@@ -45,10 +44,13 @@ const canvas = document.querySelector("canvas");
 const renderer = new UnlitRenderer(canvas);
 await renderer.initialize();
 
-const scene = new Node();
+const loader = new GLTFLoader();
+await loader.load(new URL("scene/scene/scene.gltf", import.meta.url));
+
+const scene = loader.loadScene(loader.defaultScene);
+const physics = new Physics(scene);
 
 const player = new Node();
-player.addComponent(new Transform());
 player.addComponent(
   new Transform({
     translation: [0, 0, 0],
@@ -77,6 +79,7 @@ player.addComponent(
 );
 
 player.addComponent(new PlayerMovement(canvas, player));
+player.isDynamic = true;
 scene.addChild(player);
 
 const cameraHolder = new Node();
@@ -99,34 +102,23 @@ cameraHolder.addChild(camera);
 
 scene.addChild(cameraHolder);
 
+loader.loadNode("Cube").isStatic = true;
+loader.loadNode("Cube.001").isStatic = true;
+loader.loadNode("Cube.002").isStatic = true;
+loader.loadNode("Cube.003").isStatic = true;
+loader.loadNode("Plane").isStatic = true;
 
-const floor = new Node();
-floor.addComponent(
-  new Transform({
-    scale: [10, 1, 10],
-  })
-);
-floor.addComponent(
-  new Model({
-    primitives: [
-      new Primitive({
-        mesh: resources.mesh,
-        material: new Material({
-          baseTexture: new Texture({
-            image: resources.image,
-            sampler: new Sampler({
-              minFilter: "nearest",
-              magFilter: "nearest",
-              addressModeU: "repeat",
-              addressModeV: "repeat",
-            }),
-          }),
-        }),
-      }),
-    ],
-  })
-);
-scene.addChild(floor);
+scene.traverse((node) => {
+  const model = node.getComponentOfType(Model);
+  if (!model) {
+    return;
+  }
+
+  const boxes = model.primitives.map((primitive) =>
+    calculateAxisAlignedBoundingBox(primitive.mesh)
+  );
+  node.aabb = mergeAxisAlignedBoundingBoxes(boxes);
+});
 let spawnpoints = {
   0: {translation: [-10,0,2], rotation: [0,-0.7071,0,0.7071]}, //leva stran mape
   1: {translation: [10,0,2], rotation: [0,0.7071,0,0.7071]}, // desna stran mape
@@ -191,6 +183,8 @@ function update(t, dt) {
       component.update?.(t, dt);
     }
   });
+
+  physics.update(t, dt);
 }
 
 function render() {
