@@ -63,16 +63,9 @@ export class Bullet {
       vec3.scale(this.velocity, this.velocity, this.maxSpeed / speed);
     }
 
-    this.node.aabb = {
-      min: { x: this.transform.translation[0] -  this.transform.scale[0] / 2, 
-             y: this.transform.translation[1] -  this.transform.scale[1] / 2,
-             z: this.transform.translation[2] -  this.transform.scale[2] / 2, 
-            },
-      max: { x: this.transform.translation[0] +  this.transform.scale[0] / 2, 
-             y: this.transform.translation[1] -  this.transform.scale[1] / 2, 
-             z: this.transform.translation[2] -  this.transform.scale[2] / 2, 
-            },
-    };
   }
-  
+  onHit(dmg,healthcontroller){
+    console.log("Metek je petek");
+    healthcontroller.takeDMG(dmg);
+  }
 }

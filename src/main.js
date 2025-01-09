@@ -10,7 +10,7 @@ import { UnlitRenderer } from "engine/renderers/UnlitRenderer.js";
 import { CameraFollow } from "./customComponents/cameraFollow.js";
 import { PlayerMovement } from "./customComponents/playerMovement.js";
 import { PlayerControls } from "./customComponents/playerControls.js";
-import {PlayerHealth } from "./customComponents/playerHealth.js";
+import { Health } from "./customComponents/Health.js";
 
 import { RotateObject } from "./customComponents/rotateObject.js";
 import { ZombieMovement} from "./customComponents/zombieMovement.js";
@@ -106,7 +106,7 @@ player.addComponent(
 
 player.addComponent(new PlayerControls(canvas));
 player.addComponent(new PlayerMovement(player,player.getComponentOfType(PlayerControls)));
-player.addComponent(new PlayerHealth(100));
+player.addComponent(new Health(100));
 
 player.isDynamic = true;
 const gun = new Node();
@@ -213,7 +213,8 @@ for(let i=0; i < n; i++){
       })
     );
   zombie.addComponent(new ZombieMovement(canvas,zombie,player.getComponentOfType(Transform),zombie.getComponentOfType(Transform)));
-  zombie.addComponent(new ZombieAttack(zombie,player.getComponentOfType(Transform),player.getComponentOfType(PlayerHealth)));
+  zombie.addComponent(new ZombieAttack(zombie,player.getComponentOfType(Transform),player.getComponentOfType(Health)));
+  zombie.addComponent(new Health(25));
   zombie.isDynamic = true;
   zombies.addChild(zombie);
 }

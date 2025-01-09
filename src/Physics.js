@@ -1,7 +1,8 @@
 import { vec3, mat4 } from "glm";
 import { getGlobalModelMatrix } from "engine/core/SceneUtils.js";
 import { Transform } from "engine/core.js";
-
+import { Bullet } from "./customComponents/Bullet.js";
+import { Health } from "./customComponents/Health.js";
 export class Physics {
   constructor(scene) {
     this.scene = scene;
@@ -12,7 +13,19 @@ export class Physics {
       if (node.isDynamic) {
         this.scene.traverse((other) => {
           if (node !== other && (other.isStatic || other.isDynamic)) {
+            const nodeBox = this.getTransformedAABB(node);
+            const otherBox = this.getTransformedAABB(other);
+            const isColliding = this.aabbIntersection(nodeBox, otherBox);
+            if(other.isBullet && isColliding){
+              console.log("hit");
+              const bullet = other.getComponentOfType(Bullet);
+              bullet.onHit(5,node.getComponentOfType(Health));
+              other.destroy();
+            }
+            else{
             this.resolveCollision(node, other);
+            }
+            
           }
         });
       }

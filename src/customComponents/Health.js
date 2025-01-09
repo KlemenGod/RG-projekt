@@ -1,7 +1,7 @@
 import { quat, vec3, mat4 } from "glm";
 import { Transform } from "../../engine/core/Transform.js";
 
-export class PlayerHealth {
+export class Health {
   constructor(maxHealth){
     this.maxHealth = maxHealth;
     this.hp = maxHealth;
