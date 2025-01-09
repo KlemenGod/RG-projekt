@@ -10,9 +10,11 @@ import { UnlitRenderer } from "engine/renderers/UnlitRenderer.js";
 import { CameraFollow } from "./customComponents/cameraFollow.js";
 import { PlayerMovement } from "./customComponents/playerMovement.js";
 import { PlayerControls } from "./customComponents/playerControls.js";
+import {PlayerHealth } from "./customComponents/playerHealth.js";
 
 import { RotateObject } from "./customComponents/rotateObject.js";
 import { ZombieMovement} from "./customComponents/zombieMovement.js";
+import  {ZombieAttack } from "./customComponents/ZombieAttack.js";
 import { Weapon } from "./customComponents/Weapon.js";
 
 import {
@@ -40,7 +42,7 @@ const playerRes = await loadResources({
 });
 
 const zombieRes = await loadResources({
-    mesh: new URL("models/player/player.obj", import.meta.url),
+    mesh: new URL("scene/models/zombie/zombie.obj", import.meta.url),
     image: new URL("scene/models/zombie/zombie.png", import.meta.url),
 });
 const gunRes = await loadResources({
@@ -57,10 +59,21 @@ const renderer = new UnlitRenderer(canvas);
 await renderer.initialize();
 
 const loader = new GLTFLoader();
-await loader.load(new URL("scene/scene/scene.gltf", import.meta.url));
 
+const level = await loader.load(new URL("scene/scene/scene.gltf", import.meta.url));
+const scene = level.loadScene(level.defaultScene);
+level.loadNode("Cube").isStatic = true;
+level.loadNode("Cube.001").isStatic = true;
+level.loadNode("Cube.002").isStatic = true;
+level.loadNode("Cube.003").isStatic = true;
+level.loadNode("Plane").isStatic = true;
 
-const scene = loader.loadScene(loader.defaultScene);
+/* neki sem probavu z GLTFJOM, sam nimam blage, for some reason se fizika pokvar če hočeš to naložit, specifično na 215 liniji
+const zombieGLTF = await loader.load(new URL("models/zombie/zombie.gltf", import.meta.url));
+
+const zombie = zombieGLTF.loadScene(zombieGLTF.defaultScene);
+*/
+
 const physics = new Physics(scene);
 
 const player = new Node();
@@ -93,6 +106,7 @@ player.addComponent(
 
 player.addComponent(new PlayerControls(canvas));
 player.addComponent(new PlayerMovement(player,player.getComponentOfType(PlayerControls)));
+player.addComponent(new PlayerHealth(100));
 
 player.isDynamic = true;
 const gun = new Node();
@@ -122,7 +136,7 @@ gun.addComponent(
     ],
   })
 );
-console.log(scene);
+
 gun.addComponent(new Weapon(player.getComponentOfType(Transform),gun.getComponentOfType(Transform),player.getComponentOfType(PlayerControls),bulletRes,scene));
 
 scene.addChild(player);
@@ -149,11 +163,7 @@ cameraHolder.addChild(camera);
 
 scene.addChild(cameraHolder);
 
-loader.loadNode("Cube").isStatic = true;
-loader.loadNode("Cube.001").isStatic = true;
-loader.loadNode("Cube.002").isStatic = true;
-loader.loadNode("Cube.003").isStatic = true;
-loader.loadNode("Plane").isStatic = true;
+
 
 
 let spawnpoints = {
@@ -202,7 +212,8 @@ for(let i=0; i < n; i++){
         ],
       })
     );
-  zombie.addComponent(new ZombieMovement(canvas,zombie,player.getComponentOfType(Transform),zombie.getComponentOfType(Transform),));
+  zombie.addComponent(new ZombieMovement(canvas,zombie,player.getComponentOfType(Transform),zombie.getComponentOfType(Transform)));
+  zombie.addComponent(new ZombieAttack(zombie,player.getComponentOfType(Transform),player.getComponentOfType(PlayerHealth)));
   zombie.isDynamic = true;
   zombies.addChild(zombie);
 }

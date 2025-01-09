@@ -70,7 +70,19 @@ export class Weapon{
         );
         bullet.addComponent(new Bullet(bullet,this.player,bullet.getComponentOfType(Transform)))
         console.log("fire");
-        console.log(this.scene);
+        let bulletTransform = bullet.getComponentOfType(Transform);
+        bullet.aabb = {
+          min: { x: bulletTransform.translation[0] -  bulletTransform.scale[0] / 2, 
+                 y: bulletTransform.translation[1] -  bulletTransform.scale[1] / 2, 
+                 z: bulletTransform.translation[2] -  bulletTransform.scale[2] / 2, 
+                },
+          max: { x: bulletTransform.translation[0] +  bulletTransform.scale[0] / 2, 
+                 y: bulletTransform.translation[1] -  bulletTransform.scale[1] / 2, 
+                 z: bulletTransform.translation[2] -  bulletTransform.scale[2] / 2, 
+                },
+        };
+        bullet.isDynamic = true;
+        console.log(bullet);
         this.scene.addChild(bullet);
       
     }

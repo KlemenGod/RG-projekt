@@ -67,7 +67,6 @@ export class Node {
         return this.components.filter(component => component instanceof type);
     }
     destroy(){
-        console.log("tukaj smo");
         for (const component of this.components){
             if(component.destroy){
                 component.destroy();
