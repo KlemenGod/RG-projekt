@@ -45,8 +45,8 @@ export class PlayerControls {
   }
 
   getMouseAngle(mousePos) {
-    const normalizedX = (mousePos[0] / this.canvas.width) * 2 - 1;
-    const normalizedY = 1 - (mousePos[1] / this.canvas.height) * 2;
+    const normalizedX = (mousePos[0] / this.canvas.clientWidth) * 2 - 1;
+    const normalizedY = 1 - (mousePos[1] / this.canvas.clientHeight) * 2;
 
     const projectionMatrix = this.camera.projectionMatrix;
     const inversePVMatrix = mat4.create();
