@@ -1,9 +1,10 @@
 import { quat, vec3, mat4 } from "glm";
 import { Transform } from "../../engine/core/Transform.js";
+import { Health } from "./Health.js";
+
 
 export class ZombieMovement {
   constructor(
-    domElement,
     node,
     player,
     transform,
@@ -16,7 +17,6 @@ export class ZombieMovement {
     } = {}
   ) {
     this.node = node;
-    this.domElement = domElement;
     this.player = player;
     this.transform = transform;
 
@@ -36,6 +36,9 @@ export class ZombieMovement {
     const right = [1, 0, 0];
     const offset = [-0.45, 0, -2.3];
 
+    const isDead = this.node.getComponentOfType(Health).isDead;
+    
+
     // Map user input to the acceleration vector.
     const dir = vec3.create();
 
@@ -47,7 +50,7 @@ export class ZombieMovement {
 
     vec3.sub(dir, playerVec, this.transform.translation);
     vec3.normalize(dir, dir);
-    //vec3.scaleAndAdd(this.velocity, this.velocity, dir, dt * this.acceleration);
+    vec3.scaleAndAdd(this.velocity, this.velocity, dir, dt * this.acceleration);
 
     if (vec3.distance(this.transform.translation, playerVec) <= 1.4) {
       this.velocity = [0, 0, 0];
@@ -70,6 +73,11 @@ export class ZombieMovement {
     const speed = vec3.length(this.velocity);
     if (speed > this.maxSpeed) {
       vec3.scale(this.velocity, this.velocity, this.maxSpeed / speed);
+    }
+    if(isDead){
+      this.transform.rotation = [-0.7071,0,0,0.7071];
+      this.transform.translation[1] += 0.2;
+      this.node.removeComponentsOfType(ZombieMovement);
     }
   }
 }

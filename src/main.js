@@ -14,7 +14,7 @@ import { Health } from "./customComponents/Health.js";
 
 import { RotateObject } from "./customComponents/rotateObject.js";
 import { ZombieMovement} from "./customComponents/zombieMovement.js";
-import  {ZombieAttack } from "./customComponents/ZombieAttack.js";
+import  { EnemySpawner } from "./customComponents/EnemySpawner.js";
 import { Weapon } from "./customComponents/Weapon.js";
 
 import {
@@ -109,6 +109,7 @@ player.addComponent(new PlayerMovement(player,player.getComponentOfType(PlayerCo
 player.addComponent(new Health(100));
 
 player.isDynamic = true;
+player.isPlayer = true;
 const gun = new Node();
 gun.addComponent(
     new Transform({
@@ -163,63 +164,12 @@ cameraHolder.addChild(camera);
 
 scene.addChild(cameraHolder);
 
-
-
-
-let spawnpoints = {
-  0: {translation: [-10,0,2], rotation: [0,-0.7071,0,0.7071]}, //leva stran mape
-  1: {translation: [10,0,2], rotation: [0,0.7071,0,0.7071]}, // desna stran mape
-  2: {translation: [0,0,-10], rotation: [0,1,0,0]}, // zgornja stran
-  3: {translation: [0,0,10], rotation: [0,0,0,0]}, // spodnja stran                                                      
-}
 let zombies = new Node();
-
-let n = 4;
-let spawnoffset = 1;
-let spawnloactions = [];
-for(let i=0; i < n; i++){
-  const zombie = new Node();
-  let spawnpoint = Math.floor(Math.random() * (3-0 + 1) + 0);
-  if(spawnloactions.includes(spawnpoint)){
-    spawnoffset++; 
-  }
-  zombie.addComponent(
-      new Transform({
-          translation: [spawnpoints[spawnpoint].translation[0] + spawnoffset,spawnpoints[spawnpoint].translation[1],spawnpoints[spawnpoint].translation[2]],
-          scale: [3,3,3],
-          rotation: spawnpoints[spawnpoint].rotation,   
-      })
-  );
-  spawnloactions.push(spawnpoint);
-
-  zombie.addComponent(
-      new Model({
-        primitives: [
-          new Primitive({
-            mesh: zombieRes.mesh,
-            material: new Material({
-              baseTexture: new Texture({
-                image: zombieRes.image,
-                sampler: new Sampler({
-                  minFilter: "nearest",
-                  magFilter: "nearest",
-                  addressModeU: "repeat",
-                  addressModeV: "repeat",
-                }),
-              }),
-            }),
-          }),
-        ],
-      })
-    );
-  zombie.addComponent(new ZombieMovement(canvas,zombie,player.getComponentOfType(Transform),zombie.getComponentOfType(Transform)));
-  zombie.addComponent(new ZombieAttack(zombie,player.getComponentOfType(Transform),player.getComponentOfType(Health)));
-  zombie.addComponent(new Health(25));
-  zombie.isDynamic = true;
-  zombies.addChild(zombie);
-}
+let n = 1;
+let startWave = false;
+let spawner = new EnemySpawner(zombies,zombieRes,player);
+spawner.spawn(n);
 scene.addChild(zombies);
-
 
 scene.traverse((node) => {
   const model = node.getComponentOfType(Model);
@@ -237,8 +187,10 @@ scene.traverse((node) => {
 function deleteZombie(index){
   const child = zombies.children[index];
   if(child){
-    child.destroy();
-    zombies.removeChild(child);
+    setTimeout(() =>{
+      zombies.removeChild(child);
+      child.destroy();
+    },3000);
   }
 }
 function update(t, dt) {
@@ -248,6 +200,24 @@ function update(t, dt) {
     }
   });
 
+  for(const child of zombies.children){
+    console.log("are we here");
+    let index = zombies.children.indexOf(child);
+    
+    if(child.getComponentOfType(Health).isDead){
+      deleteZombie(index);
+    }
+  }
+  if(zombies.children.length == 0 && !startWave){
+    startWave = true;
+    setTimeout(() =>{
+      n += 2; //increase zombie amount
+      spawner.spawn(n);
+      startWave = false;
+      
+    },5000);
+  }
+  
   physics.update(t, dt);
 }
 

@@ -16,14 +16,18 @@ export class Physics {
             const nodeBox = this.getTransformedAABB(node);
             const otherBox = this.getTransformedAABB(other);
             const isColliding = this.aabbIntersection(nodeBox, otherBox);
-            if(other.isBullet && isColliding){
-              console.log("hit");
+            if(other.isBullet && node.isEnemy && isColliding){
+              console.log("hit enemy");
               const bullet = other.getComponentOfType(Bullet);
               bullet.onHit(5,node.getComponentOfType(Health));
               other.destroy();
             }
+            else if(node.isBullet && other.isStatic && isColliding){
+              console.log("hit wall");
+              node.destroy();
+            }
             else{
-            this.resolveCollision(node, other);
+              this.resolveCollision(node, other);
             }
             
           }
