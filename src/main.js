@@ -1,10 +1,12 @@
 import { GUI } from "dat";
-import { mat4 } from "glm";
+import { mat4, quat } from "glm";
 
 import * as WebGPU from "engine/WebGPU.js";
 import { ResizeSystem } from "engine/systems/ResizeSystem.js";
 import { UpdateSystem } from "engine/systems/UpdateSystem.js";
 import { UnlitRenderer } from "engine/renderers/UnlitRenderer.js";
+import { LambertRenderer } from "engine/renderers/LambertRenderer.js"
+
 
 //custpm components
 import { CameraFollow } from "./customComponents/cameraFollow.js";
@@ -12,7 +14,7 @@ import { PlayerMovement } from "./customComponents/playerMovement.js";
 import { PlayerControls } from "./customComponents/playerControls.js";
 
 import { RotateObject } from "./customComponents/rotateObject.js";
-import { ZombieMovement} from "./customComponents/zombieMovement.js";
+import { ZombieMovement } from "./customComponents/zombieMovement.js";
 import { Weapon } from "./customComponents/Weapon.js";
 
 import {
@@ -33,40 +35,37 @@ import {
 import { GLTFLoader } from "engine/loaders/GLTFLoader.js";
 import { loadResources } from "engine/loaders/resources.js";
 import { Physics } from "./Physics.js";
+import { GameUI } from "./gameUI.js";
+import { Light } from "./customComponents/Light.js";
 
 const playerRes = await loadResources({
   mesh: new URL("models/player/player.obj", import.meta.url),
   image: new URL("models/player/playerTexture.png", import.meta.url),
 });
-const boxRes = await loadResources({
-  mesh: new URL("models/box/box.obj", import.meta.url),
-  image: new URL("models/box/boxTexture.png", import.meta.url),
-});
+
 const zombieRes = await loadResources({
-    mesh: new URL("models/player/player.obj", import.meta.url),
-    image: new URL("scene/models/zombie/zombie.png", import.meta.url),
+  mesh: new URL("models/player/player.obj", import.meta.url),
+  image: new URL("scene/models/zombie/zombie.png", import.meta.url),
 });
-const gunRes = await loadResources({
-  mesh: new URL("models/gun/gun.obj", import.meta.url),
-  image: new URL("models/gun/gun_texture.png", import.meta.url),
-});
+
 const bulletRes = await loadResources({
   mesh: new URL("models/bullet/bullet.obj", import.meta.url),
   image: new URL("models/bullet/bullet.png", import.meta.url),
 });
 
 const canvas = document.querySelector("canvas");
-const renderer = new UnlitRenderer(canvas);
+const renderer = new LambertRenderer(canvas);
 await renderer.initialize();
 
 const loader = new GLTFLoader();
 await loader.load(new URL("scene/scene/scene.gltf", import.meta.url));
 
-
 const scene = loader.loadScene(loader.defaultScene);
-const physics = new Physics(scene);
+const physics = new Physics(scene);  
 
-
+const light = new Node();
+light.addComponent(new Light({direction: [2,6,1],ambientLight: [0.5,0.5,0.5]}));
+scene.addChild(light);
 
 
 const player = new Node();
@@ -76,6 +75,7 @@ player.addComponent(
     scale: [3, 3, 3],
   })
 );
+
 player.addComponent(
   new Model({
     primitives: [
@@ -96,63 +96,24 @@ player.addComponent(
     ],
   })
 );
+player.isDynamic = true;
 const cameraHolder = new Node();
-cameraHolder.addComponent(new Transform());
 cameraHolder.addComponent(
-  new CameraFollow(
-    player.getComponentOfType(Transform),
-    cameraHolder.getComponentOfType(Transform),
-    {
-      offset: [0, 5, 6],
-      lookAngle: -40,
-    }
-  )
+  new Transform({
+    translation: [0, 1, 3],
+  })
 );
+
 
 const camera = new Node();
 camera.addComponent(new Transform());
+
 camera.addComponent(new Camera());
 cameraHolder.addChild(camera);
 
 scene.addChild(cameraHolder);
 
-player.addComponent(new PlayerControls(canvas,camera,player));
-player.addComponent(new PlayerMovement(player,player.getComponentOfType(PlayerControls)));
-
-player.isDynamic = true;
-const gun = new Node();
-gun.addComponent(
-    new Transform({
-      translation: [0,0,0],
-      scale: [3,3,3]
-    })
-)
-gun.addComponent(
-  new Model({
-    primitives: [
-      new Primitive({
-        mesh: gunRes.mesh,
-        material: new Material({
-          baseTexture: new Texture({
-            image: gunRes.image,
-            sampler: new Sampler({
-              minFilter: "nearest",
-              magFilter: "nearest",
-              addressModeU: "repeat",
-              addressModeV: "repeat",
-            }),
-          }),
-        }),
-      }),
-    ],
-  })
-);
-console.log(scene);
-gun.addComponent(new Weapon(player.getComponentOfType(Transform),gun.getComponentOfType(Transform),player.getComponentOfType(PlayerControls),bulletRes,scene));
-
 scene.addChild(player);
-scene.addChild(gun);
-
 
 
 
@@ -163,58 +124,120 @@ loader.loadNode("Cube.003").isStatic = true;
 loader.loadNode("Plane").isStatic = true;
 
 
-let spawnpoints = {
-  0: {translation: [-10,0,2], rotation: [0,-0.7071,0,0.7071]}, //leva stran mape
-  1: {translation: [10,0,2], rotation: [0,0.7071,0,0.7071]}, // desna stran mape
-  2: {translation: [0,0,-10], rotation: [0,1,0,0]}, // zgornja stran
-  3: {translation: [0,0,10], rotation: [0,0,0,0]}, // spodnja stran                                                      
+
+
+function cleanGameScene() {
+  //player
+  player.removeComponentsOfType(PlayerControls);
+
+  //camera
+  cameraHolder.removeComponentsOfType(CameraFollow);
+
+  
 }
-let zombies = new Node();
+function cleanMenuScene() {
+  scene.removeChildrenByName("menuSceneDeco");
+}
 
-let n = 4;
-let spawnoffset = 1;
-let spawnloactions = [];
-for(let i=0; i < n; i++){
-  const zombie = new Node();
-  let spawnpoint = Math.floor(Math.random() * (3-0 + 1) + 0);
-  if(spawnloactions.includes(spawnpoint)){
-    spawnoffset++; 
-  }
-  zombie.addComponent(
-      new Transform({
-          translation: [spawnpoints[spawnpoint].translation[0] + spawnoffset,spawnpoints[spawnpoint].translation[1],spawnpoints[spawnpoint].translation[2]],
-          scale: [3,3,3],
-          rotation: spawnpoints[spawnpoint].rotation,   
-      })
+function generateGameScene() {
+  //player
+  player.addComponent(new PlayerControls(canvas,camera,player));
+  player.addComponent(new PlayerMovement(player,player.getComponentOfType(PlayerControls)));
+
+  //camera
+  cameraHolder.addComponent(new CameraFollow(
+      player.getComponentOfType(Transform),
+      cameraHolder.getComponentOfType(Transform),
+      {
+        offset: [0, 5, 6],
+        lookAngle: -40,
+      }
+    ));
+}
+function generateMenuScene() {
+  //player
+  
+  player.getComponentOfType(Transform).translation = [0.5, 0, 1];
+  quat.fromEuler(player.getComponentOfType(Transform).rotation, 0, 34, 0);
+
+  //camera
+  quat.fromEuler(cameraHolder.getComponentOfType(Transform).rotation, 0, 20, -10);
+
+  //zombies
+  const zombie1 = new Node();
+  zombie1.name = "menuSceneDeco";
+  zombie1.addComponent(
+    new Transform({
+      translation: [-3, 0, -4],
+      scale: [3, 3, 3],
+    })
   );
-  spawnloactions.push(spawnpoint);
-
-  zombie.addComponent(
-      new Model({
-        primitives: [
-          new Primitive({
-            mesh: zombieRes.mesh,
-            material: new Material({
-              baseTexture: new Texture({
-                image: zombieRes.image,
-                sampler: new Sampler({
-                  minFilter: "nearest",
-                  magFilter: "nearest",
-                  addressModeU: "repeat",
-                  addressModeV: "repeat",
-                }),
+  quat.fromEuler(zombie1.getComponentOfType(Transform).rotation, 0, -135, 0);
+  zombie1.addComponent(
+    new Model({
+      primitives: [
+        new Primitive({
+          mesh: zombieRes.mesh,
+          material: new Material({
+            baseTexture: new Texture({
+              image: zombieRes.image,
+              sampler: new Sampler({
+                minFilter: "nearest",
+                magFilter: "nearest",
+                addressModeU: "repeat",
+                addressModeV: "repeat",
               }),
             }),
           }),
-        ],
-      })
-    );
-  zombie.addComponent(new ZombieMovement(canvas,zombie,player.getComponentOfType(Transform),zombie.getComponentOfType(Transform),));
-  zombie.isDynamic = true;
-  zombies.addChild(zombie);
-}
-scene.addChild(zombies);
+        }),
+      ],
+    })
+  );
+  scene.addChild(zombie1);
 
+  const zombie2 = new Node();
+  zombie2.name = "menuSceneDeco";
+  zombie2.addComponent(
+    new Transform({
+      translation: [-2.5, 0, 1],
+      scale: [3, 3, 3],
+    })
+  );
+  quat.fromEuler(zombie2.getComponentOfType(Transform).rotation, 0, -90, 0);
+  zombie2.addComponent(
+    new Model({
+      primitives: [
+        new Primitive({
+          mesh: zombieRes.mesh,
+          material: new Material({
+            baseTexture: new Texture({
+              image: zombieRes.image,
+              sampler: new Sampler({
+                minFilter: "nearest",
+                magFilter: "nearest",
+                addressModeU: "repeat",
+                addressModeV: "repeat",
+              }),
+            }),
+          }),
+        }),
+      ],
+    })
+  );
+  scene.addChild(zombie2);
+}
+const ui = new GameUI(loadLevel, 0);
+function loadLevel(index) {
+  console.log("load level: ", index);
+  if(index == 0){
+    cleanGameScene();
+    generateMenuScene();
+  }
+  if(index == 1){
+    cleanMenuScene();
+    generateGameScene();
+  }
+}
 
 scene.traverse((node) => {
   const model = node.getComponentOfType(Model);
@@ -228,14 +251,6 @@ scene.traverse((node) => {
   node.aabb = mergeAxisAlignedBoundingBoxes(boxes);
 });
 
-
-function deleteZombie(index){
-  const child = zombies.children[index];
-  if(child){
-    child.destroy();
-    zombies.removeChild(child);
-  }
-}
 function update(t, dt) {
   scene.traverse((node) => {
     for (const component of node.components) {
@@ -256,10 +271,3 @@ function resize({ displaySize: { width, height } }) {
 
 new ResizeSystem({ canvas, resize }).start();
 new UpdateSystem({ update, render }).start();
-
-//const gui = new GUI();
-//const controller = camera.getComponentOfType(FirstPersonController);
-//gui.add(controller, "pointerSensitivity", 0.0001, 0.01);
-//gui.add(controller, "maxSpeed", 0, 10);
-//gui.add(controller, "decay", 0, 1);
-//gui.add(controller, "acceleration", 1, 100);
