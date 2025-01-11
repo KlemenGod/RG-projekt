@@ -40,7 +40,10 @@ const playerRes = await loadResources({
   mesh: new URL("models/player/player.obj", import.meta.url),
   image: new URL("models/player/playerTexture.png", import.meta.url),
 });
-
+const boxRes = await loadResources({
+  mesh: new URL("models/box/box.obj", import.meta.url),
+  image: new URL("models/box/boxTexture.png", import.meta.url),
+});
 const zombieRes = await loadResources({
     mesh: new URL("scene/models/zombie/zombie.obj", import.meta.url),
     image: new URL("scene/models/zombie/zombie.png", import.meta.url),
@@ -76,6 +79,9 @@ const zombie = zombieGLTF.loadScene(zombieGLTF.defaultScene);
 
 const physics = new Physics(scene);
 
+
+
+
 const player = new Node();
 player.addComponent(
   new Transform({
@@ -103,8 +109,27 @@ player.addComponent(
     ],
   })
 );
+const cameraHolder = new Node();
+cameraHolder.addComponent(new Transform());
+cameraHolder.addComponent(
+  new CameraFollow(
+    player.getComponentOfType(Transform),
+    cameraHolder.getComponentOfType(Transform),
+    {
+      offset: [0, 5, 6],
+      lookAngle: -40,
+    }
+  )
+);
 
-player.addComponent(new PlayerControls(canvas));
+const camera = new Node();
+camera.addComponent(new Transform());
+camera.addComponent(new Camera());
+cameraHolder.addChild(camera);
+
+scene.addChild(cameraHolder);
+
+player.addComponent(new PlayerControls(canvas,camera,player));
 player.addComponent(new PlayerMovement(player,player.getComponentOfType(PlayerControls)));
 player.addComponent(new Health(100));
 
@@ -144,25 +169,7 @@ scene.addChild(player);
 scene.addChild(gun);
 
 
-const cameraHolder = new Node();
-cameraHolder.addComponent(new Transform());
-cameraHolder.addComponent(
-  new CameraFollow(
-    player.getComponentOfType(Transform),
-    cameraHolder.getComponentOfType(Transform),
-    {
-      offset: [0, 5, 6],
-      lookAngle: -40,
-    }
-  )
-);
 
-const camera = new Node();
-camera.addComponent(new Transform());
-camera.addComponent(new Camera());
-cameraHolder.addChild(camera);
-
-scene.addChild(cameraHolder);
 
 let zombies = new Node();
 let n = 1;

@@ -15,6 +15,9 @@ export class Transform {
     }
   }
 
+  setTranslation(pos) {
+    this.translation = pos;
+  }
   setRotation(x, y, z, w) {
     this.rotation = [x, y, z, w];
   }
