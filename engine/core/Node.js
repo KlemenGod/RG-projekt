@@ -66,7 +66,7 @@ export class Node {
     getComponentsOfType(type) {
         return this.components.filter(component => component instanceof type);
     }
-    destroy(){
+    destroy(scene){
         for (const component of this.components){
             if(component.destroy){
                 component.destroy();
@@ -77,5 +77,8 @@ export class Node {
         }
         this.children = [];
         this.components = [];
+        this.parent = null;
+        scene.removeChild(this);
+        
     }
 }

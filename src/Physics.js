@@ -20,11 +20,12 @@ export class Physics {
               console.log("hit enemy");
               const bullet = other.getComponentOfType(Bullet);
               bullet.onHit(5,node.getComponentOfType(Health));
-              other.destroy();
+              
+              other.destroy(this.scene);
             }
             else if(node.isBullet && other.isStatic && isColliding){
               console.log("hit wall");
-              node.destroy();
+              node.destroy(this.scene);
             }
             else{
               this.resolveCollision(node, other);

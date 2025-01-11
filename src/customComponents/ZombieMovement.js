@@ -50,7 +50,7 @@ export class ZombieMovement {
 
     vec3.sub(dir, playerVec, this.transform.translation);
     vec3.normalize(dir, dir);
-    vec3.scaleAndAdd(this.velocity, this.velocity, dir, dt * this.acceleration);
+    //vec3.scaleAndAdd(this.velocity, this.velocity, dir, dt * this.acceleration);
 
     if (vec3.distance(this.transform.translation, playerVec) <= 1.4) {
       this.velocity = [0, 0, 0];

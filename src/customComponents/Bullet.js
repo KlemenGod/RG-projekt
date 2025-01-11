@@ -9,8 +9,8 @@ export class Bullet {
     transform,
     {
       velocity = [0, 0, 0],
-      acceleration = 30,
-      maxSpeed = 2,
+      acceleration = 60,
+      maxSpeed = 10,
       hit = false,
       targetPos = null,
     } = {}
@@ -30,13 +30,15 @@ export class Bullet {
     // Calculate forward and right vectors.
     const cos = Math.cos(this.yaw);
     const sin = Math.sin(this.yaw);
-    const forward = [0, 0, 1];
+    const forward = [0, 0, -1];
     const right = [1, 0, 0];
     const offset = [-0.45,0,-2.3];
     
 
     // Map user input to the acceleration vector.
-    const dir = vec3.create();
+    const bulletdir = vec3.create();
+    vec3.transformQuat(bulletdir,forward,this.transform.rotation);
+    vec3.normalize(bulletdir,bulletdir);
 
     const playerVec = vec3.fromValues(
       this.player.translation[0],
@@ -44,10 +46,10 @@ export class Bullet {
       this.player.translation[2]
     );
     
+    
   
     
-    this.transform.translation[2] -= 0.043;
-    vec3.scaleAndAdd(this.velocity, this.velocity, dir, dt * this.acceleration);
+    vec3.scaleAndAdd(this.velocity, this.velocity, bulletdir, dt * this.acceleration);
   
     vec3.scaleAndAdd(
       this.transform.translation,
@@ -65,7 +67,13 @@ export class Bullet {
 
   }
   onHit(dmg,healthcontroller){
-    console.log("Metek je petek");
     healthcontroller.takeDMG(dmg);
+  }
+  destroy(){
+    console.log("destroy bullet");
+    this.node = null;
+    this.player = null;
+    this.transform = null;
+
   }
 }

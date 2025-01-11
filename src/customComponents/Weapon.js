@@ -41,17 +41,25 @@ export class Weapon {
     this.transform.translation[1] = this.player.translation[1];
     this.transform.translation[2] = this.player.translation[2];
 
+    this.transform.rotation = this.player.rotation;
+
     if (this.playerControls.keys["Space"] && this.canFire) {
       this.canFire = false;
       this.fire();
     }
+    if (!this.playerControls.keys["Space"]) {
+      this.canFire = true;
+  }
   }
   fire() {
     const bullet = new Node();
+    console.log(this.transform.rotation);
     bullet.addComponent(
       new Transform({
         translation: [this.transform.translation[0], this.transform.translation[1], this.transform.translation[2]],
         scale: [3, 3, 3],
+        rotation:  [this.transform.rotation[0],this.transform.rotation[1],this.transform.rotation[2], this.transform.rotation[3]],
+       
       })
     );
     bullet.addComponent(
@@ -78,8 +86,7 @@ export class Weapon {
     bullet.addComponent(
       new Bullet(bullet, this.player, bullet.getComponentOfType(Transform))
     );
-    console.log("fire");
-
+    
     const model = bullet.getComponentOfType(Model);
     if (!model) {
       return;
@@ -90,6 +97,8 @@ export class Weapon {
     );
 
     bullet.aabb = mergeAxisAlignedBoundingBoxes(boxes);
+
+    
     bullet.isDynamic = true;
     bullet.isBullet = true;
 

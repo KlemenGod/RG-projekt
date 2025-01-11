@@ -196,7 +196,7 @@ function deleteZombie(index){
   if(child){
     setTimeout(() =>{
       zombies.removeChild(child);
-      child.destroy();
+      child.destroy(scene);
     },3000);
   }
 }
