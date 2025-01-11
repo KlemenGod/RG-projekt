@@ -70,7 +70,6 @@ export class Bullet {
     healthcontroller.takeDMG(dmg);
   }
   destroy(){
-    console.log("destroy bullet");
     this.node = null;
     this.player = null;
     this.transform = null;

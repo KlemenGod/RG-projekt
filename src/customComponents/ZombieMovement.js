@@ -1,13 +1,14 @@
 import { quat, vec3, mat4 } from "glm";
 import { Transform } from "../../engine/core/Transform.js";
 import { Health } from "./Health.js";
-
+import { RotateAnimator } from "../../engine/animators/RotateAnimator.js";
 
 export class ZombieMovement {
   constructor(
     node,
     player,
     transform,
+    speedfactor,
     {
       velocity = [0, 0, 0],
       acceleration = 30,
@@ -19,7 +20,7 @@ export class ZombieMovement {
     this.node = node;
     this.player = player;
     this.transform = transform;
-
+    this.speedfactor = speedfactor;
     this.velocity = velocity;
     this.acceleration = acceleration;
     this.maxSpeed = maxSpeed;
@@ -50,8 +51,8 @@ export class ZombieMovement {
 
     vec3.sub(dir, playerVec, this.transform.translation);
     vec3.normalize(dir, dir);
-    //vec3.scaleAndAdd(this.velocity, this.velocity, dir, dt * this.acceleration);
-
+    vec3.scaleAndAdd(this.velocity, this.velocity, dir, dt * this.acceleration);
+    vec3.scale(this.velocity,this.velocity,this.speedfactor);
     if (vec3.distance(this.transform.translation, playerVec) <= 1.4) {
       this.velocity = [0, 0, 0];
     }
@@ -75,8 +76,15 @@ export class ZombieMovement {
       vec3.scale(this.velocity, this.velocity, this.maxSpeed / speed);
     }
     if(isDead){
-      this.transform.rotation = [-0.7071,0,0,0.7071];
+      //this.transform.rotation = [-0.7071,0,0,0.7071];
+      this.node.addComponent(new RotateAnimator(this.node),{
+        startRotation: [-0.7071, 0, 0, 0],
+        endRotation: [0.7071, 0, 0.7071, 0],
+        duration: 5,
+      });
+      
       this.transform.translation[1] += 0.2;
+
       this.node.removeComponentsOfType(ZombieMovement);
     }
   }

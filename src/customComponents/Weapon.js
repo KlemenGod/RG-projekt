@@ -53,7 +53,6 @@ export class Weapon {
   }
   fire() {
     const bullet = new Node();
-    console.log(this.transform.rotation);
     bullet.addComponent(
       new Transform({
         translation: [this.transform.translation[0], this.transform.translation[1], this.transform.translation[2]],

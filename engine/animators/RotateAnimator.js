@@ -1,5 +1,4 @@
-import { vec3 } from 'glm';
-
+import { quat, vec3 } from 'glm';
 import { Transform } from '../core/Transform.js';
 
 export class RotateAnimator {
@@ -40,6 +39,8 @@ export class RotateAnimator {
         const clampedInterpolation = Math.min(Math.max(linearInterpolation, 0), 1);
         const loopedInterpolation = ((linearInterpolation % 1) + 1) % 1;
         this.updateNode(this.loop ? loopedInterpolation : clampedInterpolation);
+
+        
     }
 
     updateNode(interpolation) {

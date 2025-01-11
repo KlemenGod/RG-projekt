@@ -24,7 +24,6 @@ export class Health {
   die(){
       this.isDead = true;
       this.node.isDynamic = false;
-      console.log(this.node.isDynamic);
     }
   }
 

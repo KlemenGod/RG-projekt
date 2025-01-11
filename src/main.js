@@ -45,8 +45,8 @@ const boxRes = await loadResources({
   image: new URL("models/box/boxTexture.png", import.meta.url),
 });
 const zombieRes = await loadResources({
-    mesh: new URL("scene/models/zombie/zombie.obj", import.meta.url),
-    image: new URL("scene/models/zombie/zombie.png", import.meta.url),
+    mesh: new URL("scene/models/zombie/test.obj", import.meta.url),
+    image: new URL("scene/models/zombie/zombiecolor.png", import.meta.url),
 });
 const gunRes = await loadResources({
   mesh: new URL("models/gun/gun.obj", import.meta.url),
@@ -58,6 +58,8 @@ const bulletRes = await loadResources({
 });
 
 const canvas = document.querySelector("canvas");
+const bgmusic = document.getElementById("bgMusic");
+
 const renderer = new UnlitRenderer(canvas);
 await renderer.initialize();
 
@@ -70,6 +72,7 @@ level.loadNode("Cube.001").isStatic = true;
 level.loadNode("Cube.002").isStatic = true;
 level.loadNode("Cube.003").isStatic = true;
 level.loadNode("Plane").isStatic = true;
+
 
 /* neki sem probavu z GLTFJOM, sam nimam blage, for some reason se fizika pokvar če hočeš to naložit, specifično na 215 liniji
 const zombieGLTF = await loader.load(new URL("models/zombie/zombie.gltf", import.meta.url));
@@ -168,14 +171,21 @@ gun.addComponent(new Weapon(player.getComponentOfType(Transform),gun.getComponen
 scene.addChild(player);
 scene.addChild(gun);
 
-
+const levels = [
+  { level1: 1, number: 4, healthfactor: 1, speedfactor: 1 },
+  { level2: 2, number: 8, healthfactor: 1.25, speedfactor: 1.25 },
+  { level3: 3, number: 12, healthfactor: 1.5, speedfactor: 1.5 },
+  { level4: 4, number: 16, healthfactor: 2, speedfactor: 2 },
+  { level5: 5, number: 20, healthfactor: 2.5, speedfactor: 2.5 },
+];
 
 
 let zombies = new Node();
 let n = 1;
+let levelindex = 0;
 let startWave = false;
 let spawner = new EnemySpawner(zombies,zombieRes,player);
-spawner.spawn(n);
+spawner.spawn(n,levels[levelindex].healthfactor,levels[levelindex].speedfactor);
 scene.addChild(zombies);
 
 scene.traverse((node) => {
@@ -214,11 +224,23 @@ function update(t, dt) {
       deleteZombie(index);
     }
   }
+  if(player.getComponentOfType(Health).isDead){
+    console.log("player died game over");
+    
+    player.removeComponent(PlayerMovement);
+    window.location.reload();
+  }
   if(zombies.children.length == 0 && !startWave){
     startWave = true;
     setTimeout(() =>{
       n += 2; //increase zombie amount
-      spawner.spawn(n);
+      levelindex++;
+      if(levelindex >= levels.length){
+        console.log("game has been won");
+      }
+      else {
+        spawner.spawn(n,levels[levelindex].healthfactor,levels[levelindex].speedfactor);
+      }
       startWave = false;
       
     },5000);
@@ -237,7 +259,10 @@ function resize({ displaySize: { width, height } }) {
 
 new ResizeSystem({ canvas, resize }).start();
 new UpdateSystem({ update, render }).start();
-
+function gamveOver(){
+  physics = null;
+  scene = null;
+}
 //const gui = new GUI();
 //const controller = camera.getComponentOfType(FirstPersonController);
 //gui.add(controller, "pointerSensitivity", 0.0001, 0.01);

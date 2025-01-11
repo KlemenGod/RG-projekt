@@ -16,10 +16,13 @@ import {
 } from "../../engine/core.js";
 
 export class EnemySpawner {
-  constructor(enemies, zombieRes, playerNode) {
+  constructor(enemies, zombieRes, playerNode,speedfactor,healthfactor) {
     this.enemies = enemies;
     this.zombieRes = zombieRes;
     this.playerNode = playerNode;
+
+    
+    
 
     this.spawnpoints = {
       0: { translation: [-10, 0, 2], rotation: [0, -0.7071, 0, 0.7071] }, //leva stran mape
@@ -29,7 +32,7 @@ export class EnemySpawner {
     };
   }
 
-  spawn(n) {
+  spawn(n,healthfactor,speedfactor) {
     let spawnoffset = 1;
     let spawnloactions = [];
     for (let i = 0; i < n; i++) {
@@ -75,7 +78,8 @@ export class EnemySpawner {
         new ZombieMovement(
           zombie,
           this.playerNode.getComponentOfType(Transform),
-          zombie.getComponentOfType(Transform)
+          zombie.getComponentOfType(Transform),
+          speedfactor
         )
       );
       zombie.addComponent(
@@ -85,7 +89,7 @@ export class EnemySpawner {
           this.playerNode.getComponentOfType(Health)
         )
       );
-      zombie.addComponent(new Health(5, zombie));
+      zombie.addComponent(new Health(15*healthfactor, zombie));
 
       const model = zombie.getComponentOfType(Model);
       if (!model) {
@@ -101,5 +105,11 @@ export class EnemySpawner {
       zombie.isEnemy = true;
       this.enemies.addChild(zombie);
     }
+  }
+  setSpeedfactor(speedfactor){
+    this.speedfactor = speedfactor;
+  }
+  setHelathfactor(healthfactor){
+    this.healthfactor = healthfactor;
   }
 }

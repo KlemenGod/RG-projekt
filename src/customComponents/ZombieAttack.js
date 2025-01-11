@@ -48,12 +48,27 @@ export class ZombieAttack {
     }
   }
   attack() {
+    const zombieTransform = this.node.getComponentOfType(Transform);
+    const forward = [0, 0, -1];
     console.log("attack player");
+
+    
+    const knockbackdir = vec3.create();
+    vec3.transformQuat(knockbackdir,forward,zombieTransform.rotation);
+    vec3.normalize(knockbackdir,knockbackdir);
+
     this.player.translation = [
+      this.player.translation[0] += knockbackdir[0] * 2.5,
+      this.player.translation[1] += knockbackdir[1] * 2.5,
+      this.player.translation[2] += knockbackdir[2] * 2.5,
+    ];
+
+    const playerVec = vec3.fromValues(
       this.player.translation[0],
       this.player.translation[1],
-      this.player.translation[2] + 0.4,
-    ];
+      this.player.translation[2]
+    );
+
     this.playerHP.takeDMG(5);
   }
 }
