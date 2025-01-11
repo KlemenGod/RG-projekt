@@ -1,6 +1,7 @@
 export class Node {
 
     constructor() {
+        this.name = "";
         this.parent = null;
         this.children = [];
         this.components = [];
@@ -19,6 +20,10 @@ export class Node {
 
     remove() {
         this.parent?.removeChild(this);
+    }
+    removeChildrenByName(name){
+        this.children.map((child) => {if(child.name == name) child.parent = null});
+        this.children = this.children.filter(child => child.name !== name);
     }
 
     traverse(before, after) {
