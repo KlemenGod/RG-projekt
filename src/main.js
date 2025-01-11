@@ -201,7 +201,6 @@ function update(t, dt) {
   });
 
   for(const child of zombies.children){
-    console.log("are we here");
     let index = zombies.children.indexOf(child);
     
     if(child.getComponentOfType(Health).isDead){
