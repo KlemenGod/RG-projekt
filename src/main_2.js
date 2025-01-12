@@ -1,5 +1,5 @@
 import { GUI } from "dat";
-import { mat4 } from "glm";
+import { mat4, quat } from "glm";
 
 import * as WebGPU from "engine/WebGPU.js";
 import { ResizeSystem } from "engine/systems/ResizeSystem.js";
@@ -14,6 +14,7 @@ import { PlayerControls } from "./customComponents/playerControls.js";
 import { Health } from "./customComponents/Health.js";
 import { Light } from "./customComponents/Light.js";
 import { SoundManager} from "./customComponents/soundManger.js";
+import { WalkingAnimator } from "./customComponents/WalkingAnimator.js";
 
 import { RotateObject } from "./customComponents/rotateObject.js";
 import { ZombieMovement} from "./customComponents/zombieMovement.js";
@@ -41,7 +42,7 @@ import { Physics } from "./Physics.js";
 import { GameUI } from "./gameUI.js";
 
 const playerRes = await loadResources({
-  mesh: new URL("models/player/player.obj", import.meta.url),
+  mesh: new URL("models/player/fullbody.obj", import.meta.url),
   image: new URL("models/player/playerTexture.png", import.meta.url),
 });
 const boxRes = await loadResources({
@@ -53,12 +54,30 @@ const zombieRes = await loadResources({
     image: new URL("scene/models/zombie/zombiecolor.png", import.meta.url),
 });
 const gunRes = await loadResources({
-  mesh: new URL("models/gun/gun.obj", import.meta.url),
+  mesh: new URL("models/gun/pistol.obj", import.meta.url),
   image: new URL("models/gun/gun_texture.png", import.meta.url),
 });
 const bulletRes = await loadResources({
-  mesh: new URL("models/bullet/bullet.obj", import.meta.url),
+  mesh: new URL("models/bullet/bullet_3.obj", import.meta.url),
   image: new URL("models/bullet/bullet.png", import.meta.url),
+});
+
+// player by parts
+const playerBody = await loadResources({
+  mesh: new URL("models/player/body.obj", import.meta.url),
+  image: new URL("models/player/playerTexture.png", import.meta.url),
+});
+const playerLeftArm = await loadResources({
+  mesh: new URL("models/player/leftarm.obj", import.meta.url),
+  image: new URL("models/player/playerTexture.png", import.meta.url),
+});
+const playerLeftLeg = await loadResources({
+  mesh: new URL("models/player/leftleg.obj", import.meta.url),
+  image: new URL("models/player/playerTexture.png", import.meta.url),
+});
+const playerRightLeg = await loadResources({
+  mesh: new URL("models/player/rightleg.obj", import.meta.url),
+  image: new URL("models/player/playerTexture.png", import.meta.url),
 });
 
 const canvas = document.querySelector("canvas");
@@ -103,7 +122,7 @@ player.addComponent(
   new Model({
     primitives: [
       new Primitive({
-        mesh: playerRes.mesh,
+        mesh: playerBody.mesh,
         material: new Material({
           baseTexture: new Texture({
             image: playerRes.image,
@@ -119,6 +138,123 @@ player.addComponent(
     ],
   })
 );
+
+
+
+// player arm and legs
+const leftArm = new Node();
+leftArm.addComponent(new Transform());
+leftArm.addComponent(
+  new Model({
+    primitives: [
+      new Primitive({
+        mesh: playerLeftArm.mesh,
+        material: new Material({
+          baseTexture: new Texture({
+            image: playerRes.image,
+            sampler: new Sampler({
+              minFilter: "nearest",
+              magFilter: "nearest",
+              addressModeU: "repeat",
+              addressModeV: "repeat",
+            }),
+          }),
+        }),
+      }),
+    ],
+  })
+);
+leftArm.addComponent(new WalkingAnimator(leftArm,
+  {
+   startRotation: quat.fromEuler([], 30, 0, 0),
+   endRotation: quat.fromEuler([], -30, 0, 0),
+  },
+  {
+    startPosition: quat.fromEuler([], 0, 2, -27),
+    endPosition: quat.fromEuler([], 0, 2, 27),
+  },
+  0,    // startTime
+  1,  // duration
+  true  // loop?
+));
+player.addChild(leftArm);
+
+const leftLeg = new Node();
+leftLeg.addComponent(new Transform());
+leftLeg.addComponent(
+  new Model({
+    primitives: [
+      new Primitive({
+        mesh: playerLeftLeg.mesh,
+        material: new Material({
+          baseTexture: new Texture({
+            image: playerRes.image,
+            sampler: new Sampler({
+              minFilter: "nearest",
+              magFilter: "nearest",
+              addressModeU: "repeat",
+              addressModeV: "repeat",
+            }),
+          }),
+        }),
+      }),
+    ],
+  })
+);
+leftLeg.addComponent(new WalkingAnimator(leftLeg,
+  {
+   startRotation: quat.fromEuler([], -30, 0, 0),
+   endRotation: quat.fromEuler([], 30, 0, 0),
+  },
+  {
+    startPosition: quat.fromEuler([], 0, 3, 15),
+    endPosition: quat.fromEuler([], 0, 3, -15),
+  },
+  0,    // startTime
+  1,  // duration
+  true  // loop?
+));
+player.addChild(leftLeg);
+
+const rightLeg = new Node();
+rightLeg.addComponent(new Transform());
+rightLeg.addComponent(
+  new Model({
+    primitives: [
+      new Primitive({
+        mesh: playerRightLeg.mesh,
+        material: new Material({
+          baseTexture: new Texture({
+            image: playerRes.image,
+            sampler: new Sampler({
+              minFilter: "nearest",
+              magFilter: "nearest",
+              addressModeU: "repeat",
+              addressModeV: "repeat",
+            }),
+          }),
+        }),
+      }),
+    ],
+  })
+);
+rightLeg.addComponent(new WalkingAnimator(rightLeg,
+  {
+   startRotation: quat.fromEuler([], 30, 0, 0),
+   endRotation: quat.fromEuler([], -30, 0, 0),
+  },
+  {
+    startPosition: quat.fromEuler([], 0, 3, -15),
+    endPosition: quat.fromEuler([], 0, 3, 15),
+  },
+  0,    // startTime
+  1,  // duration
+  true  // loop?
+));
+player.addChild(rightLeg);
+
+
+
 const cameraHolder = new Node();
 cameraHolder.addComponent(new Transform());
 cameraHolder.addComponent(
@@ -140,7 +276,7 @@ cameraHolder.addChild(camera);
 scene.addChild(cameraHolder);
 
 player.addComponent(new PlayerControls(canvas,camera,player));
-player.addComponent(new PlayerMovement(player,player.getComponentOfType(PlayerControls)));
+player.addComponent(new PlayerMovement(player,player.getComponentOfType(PlayerControls), leftArm, leftLeg, rightLeg));
 player.addComponent(new Health(100));
 
 player.isDynamic = true;
