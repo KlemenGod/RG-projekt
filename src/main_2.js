@@ -85,6 +85,7 @@ const canvas = document.querySelector("canvas");
 const playerHP = document.getElementById("playerhealth");
 const displayWave = document.getElementById("wave");
 const UI = document.getElementById("ui-container");
+const displayAmmo = document.getElementById("ammo");
 const gameOverText = document.getElementById("gameoverText");
 
 //const renderer = new UnlitRenderer(canvas);
@@ -409,6 +410,10 @@ function update(t, dt) {
   playerHP.innerHTML = "HP: " + player.getComponentOfType(Health).hp;
 
   displayWave.innerHTML = "Wave: " + onWave;
+
+  displayAmmo.innerHTML = "Ammo: " + gun.getComponentOfType(Weapon).nofBullets + "/" + gun.getComponentOfType(Weapon).clipSize;
+
+
   physics.update(t, dt);
 
 
