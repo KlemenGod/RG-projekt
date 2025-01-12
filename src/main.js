@@ -45,8 +45,8 @@ const playerRes = await loadResources({
 });
 
 const zombieRes = await loadResources({
-  mesh: new URL("models/player/player.obj", import.meta.url),
-  image: new URL("scene/models/zombie/zombie.png", import.meta.url),
+  mesh: new URL("scene/models/zombie/test.obj", import.meta.url),
+  image: new URL("scene/models/zombie/zombiecolor.png", import.meta.url),
 });
 
 const bulletRes = await loadResources({
@@ -140,7 +140,8 @@ function cleanMenuScene() {
   scene.removeChildrenByName("menuSceneDeco");
 }
 
-function generateGameScene() {
+function generateGameScene(index) {
+  /*
   //player
   player.addComponent(new PlayerControls(canvas,camera,player));
   player.addComponent(new PlayerMovement(player,player.getComponentOfType(PlayerControls)));
@@ -154,6 +155,13 @@ function generateGameScene() {
         lookAngle: -40,
       }
     ));
+    */
+   import('./main_2.js').then((main_2) => {
+    main_2.initSound();
+    main_2.inittLevel(index);
+
+    console.log("game loop started");
+   });
 }
 function generateMenuScene() {
   //player
@@ -234,10 +242,19 @@ function loadLevel(index) {
     cleanGameScene();
     generateMenuScene();
   }
+  else {
+    cleanMenuScene();
+    generateGameScene(index);
+  }
+  /*
   if(index == 1){
     cleanMenuScene();
     generateGameScene();
   }
+  if(index == 2){
+    console.log("load level 2");
+  }
+    */
 }
 
 scene.traverse((node) => {

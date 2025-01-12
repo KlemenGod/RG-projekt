@@ -16,6 +16,9 @@ import {
 import { loadResources } from "engine/loaders/resources.js";
 import { Bullet } from "./Bullet.js";
 
+import { SoundManager} from "./soundManger.js";
+const gunsound = document.getElementById("gunsound");
+const player = new SoundManager();
 export class Weapon {
   constructor(player, transform, playerControls, bulletRes, scene) {
     this.player = player;
@@ -52,6 +55,8 @@ export class Weapon {
   }
   }
   fire() {
+    player.play(gunsound);
+
     const bullet = new Node();
     bullet.addComponent(
       new Transform({

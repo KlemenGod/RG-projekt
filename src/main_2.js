@@ -5,12 +5,15 @@ import * as WebGPU from "engine/WebGPU.js";
 import { ResizeSystem } from "engine/systems/ResizeSystem.js";
 import { UpdateSystem } from "engine/systems/UpdateSystem.js";
 import { UnlitRenderer } from "engine/renderers/UnlitRenderer.js";
+import { LambertRenderer } from "engine/renderers/LambertRenderer.js"
 
 //custpm components
 import { CameraFollow } from "./customComponents/cameraFollow.js";
 import { PlayerMovement } from "./customComponents/playerMovement.js";
 import { PlayerControls } from "./customComponents/playerControls.js";
 import { Health } from "./customComponents/Health.js";
+import { Light } from "./customComponents/Light.js";
+import { SoundManager} from "./customComponents/soundManger.js";
 
 import { RotateObject } from "./customComponents/rotateObject.js";
 import { ZombieMovement} from "./customComponents/zombieMovement.js";
@@ -59,27 +62,30 @@ const bulletRes = await loadResources({
 });
 
 const canvas = document.querySelector("canvas");
-const bgmusic = document.getElementById("bgMusic");
 
-const renderer = new UnlitRenderer(canvas);
+
+//const renderer = new UnlitRenderer(canvas);
+const renderer = new LambertRenderer(canvas);
 await renderer.initialize();
 
 const loader = new GLTFLoader();
 
 const level = await loader.load(new URL("scene/scene/scene.gltf", import.meta.url));
 const scene = level.loadScene(level.defaultScene);
+
+
+
+
+
 level.loadNode("Cube").isStatic = true;
 level.loadNode("Cube.001").isStatic = true;
 level.loadNode("Cube.002").isStatic = true;
 level.loadNode("Cube.003").isStatic = true;
 level.loadNode("Plane").isStatic = true;
 
-
-/* neki sem probavu z GLTFJOM, sam nimam blage, for some reason se fizika pokvar če hočeš to naložit, specifično na 215 liniji
-const zombieGLTF = await loader.load(new URL("models/zombie/zombie.gltf", import.meta.url));
-
-const zombie = zombieGLTF.loadScene(zombieGLTF.defaultScene);
-*/
+const light = new Node();
+light.addComponent(new Light({direction: [2,6,1],ambientLight: [0.5,0.5,0.5]}));
+scene.addChild(light);
 
 const physics = new Physics(scene);
 
@@ -179,14 +185,33 @@ const levels = [
   { level4: 4, number: 16, healthfactor: 2, speedfactor: 2 },
   { level5: 5, number: 20, healthfactor: 2.5, speedfactor: 2.5 },
 ];
-
-
 let zombies = new Node();
-let n = 1;
-let levelindex = 0;
-let startWave = false;
 let spawner = new EnemySpawner(zombies,zombieRes,player);
-spawner.spawn(n,levels[levelindex].healthfactor,levels[levelindex].speedfactor);
+let levelindex = 0;
+let n = 2;
+let startWave = false;
+export function initSound(){
+  console.log("sound on");
+  const bgmusic = document.getElementById("bgMusic");
+  
+
+  const player = new SoundManager();
+  player.setVolume(0.2);
+  player.play(bgmusic);
+  bgmusic.loop = true;
+}
+export function inittLevel(index){
+  levelindex = index - 1;
+  console.log("index: " + index);
+  console.log(levels[levelindex].number);
+  if(levelindex < levels.length){
+    spawner.spawn(levels[levelindex].number,levels[levelindex].healthfactor,levels[levelindex].speedfactor);
+  }
+  else {
+    console.log("given level does not exsist");
+  }
+}
+console.log(levelindex);
 scene.addChild(zombies);
 
 scene.traverse((node) => {
