@@ -28,7 +28,12 @@ export class Weapon {
     this.playerControls = playerControls;
     this.bulletRes = bulletRes;
     this.scene = scene;
+
     this.canFire = true;
+    this.canReload = false;  // you can only reload after having shot at least one bullet
+
+    this.clipSize = 7;    // aka max number of bullets
+    this.nofBullets = this.clipSize;  // current number of bullets
   }
 
   update(t, dt) {
@@ -49,12 +54,27 @@ export class Weapon {
     this.transform.rotation = this.player.rotation;
 
     if (this.playerControls.keys["Space"] && this.canFire) {
-      this.canFire = false;
-      this.fire();
+      if (this.nofBullets > 0) {
+        this.canFire = false;
+        this.canReload = true;
+
+        this.nofBullets -= 1;
+        this.fire();
+      }
+      else {
+        // play empty clip sound
+      }
     }
     if (!this.playerControls.keys["Space"]) {
       this.canFire = true;
-  }
+    }
+
+    // reloading
+    if (this.playerControls.keys["KeyR"] && this.canReload) {
+      this.nofBullets = this.clipSize;
+      this.canReload = false;
+      // play reload sound
+    }
   }
   fire() {
     player.play(gunsound,true);
