@@ -27,10 +27,10 @@ export class Physics {
               console.log("hit wall");
               node.destroy(this.scene);
             }
+
             else{
               this.resolveCollision(node, other);
             }
-            
           }
         });
       }
@@ -137,4 +137,15 @@ export class Physics {
 
     vec3.add(transform.translation, transform.translation, minDirection);
   }
+  PointCollision(point, wall) {
+    const wallBox = this.getTransformedAABB(wall); 
+    return (
+        point[0] >= wallBox.min[0] &&
+        point[0] <= wallBox.max[0] &&
+        point[1] >= wallBox.min[1] &&
+        point[1] <= wallBox.max[1] &&
+        point[2] >= wallBox.min[2] &&
+        point[2] <= wallBox.max[2]
+    );
+}
 }

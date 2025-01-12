@@ -20,15 +20,16 @@
     <audio id="bgMusic">
       <source src="./audio/right_behind_you.mp3" type="audio/mpeg" preload>
     </audio>
-    <audio id="enemysound"> 
-      <source src="./audio/zombie_growl.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="gunsound">
-      <source src="./audio/pistol.mp3" type="audio/mpeg">
-    </audio>
 
-    <div class="fullscreen no-touch pixelated">
-      <canvas></canvas>
+    <div id="ui-container" hidden>
+      <span id="playerhealth" > </span>
+      <span id="wave" ></span>
+    </div>
+
+    <span id="gameoverText" hidden> GAME OVER </span>
+
+    <div class="fullscreen no-touch pixelated">  
+      <canvas id="canvas"></canvas>
     </div>
   </body>
 </html>

@@ -54,3 +54,44 @@ body, html {
       0% { transform: rotate(0deg); }
     100% { transform: rotate(1800deg); }
 }
+
+
+#ui-container {
+    position: fixed;
+    top: 20px;
+    left: 50px;
+    color: white; 
+    font-family: Arial, sans-serif; 
+    z-index: 1000; 
+}
+
+#playerhealth {
+    display: block; 
+    margin-bottom: 10px; 
+    font-size: 18px;
+    background: rgba(0, 0, 0, 0.7); 
+    padding: 5px 10px; 
+    border-radius: 5px;
+}
+
+#wave {
+    display: block;
+    font-size: 18px;
+    background: rgba(0, 0, 0, 0.7); 
+    padding: 5px 10px; 
+    border-radius: 5px;
+}
+#gameoverText {
+    position: fixed;
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    font-size: 50px; 
+    color: red; 
+    font-family: Arial, sans-serif; 
+    font-weight: bold; 
+    z-index: 1000; 
+}
+
+
+

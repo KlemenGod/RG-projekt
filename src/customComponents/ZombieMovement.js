@@ -4,6 +4,12 @@ import { Health } from "./Health.js";
 import { RotateAnimator } from "../../engine/animators/RotateAnimator.js";
 import { ZombieAttack } from "./ZombieAttack.js";
 
+import { SoundManager} from "./soundManger.js"
+let zombieSound = new Audio("./audio/zombie_growl.mp3");
+zombieSound.preload = 'auto';
+zombieSound.load();
+const player = new SoundManager();
+
 export class ZombieMovement {
   deathPlayed = false;
   constructor(
@@ -41,6 +47,8 @@ export class ZombieMovement {
 
     const isDead = this.node.getComponentOfType(Health).isDead;
 
+    
+    player.play(zombieSound);
 
     // Map user input to the acceleration vector.
     const dir = vec3.create();

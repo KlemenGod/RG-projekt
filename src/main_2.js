@@ -61,8 +61,13 @@ const bulletRes = await loadResources({
   image: new URL("models/bullet/bullet.png", import.meta.url),
 });
 
+
 const canvas = document.querySelector("canvas");
 
+const playerHP = document.getElementById("playerhealth");
+const displayWave = document.getElementById("wave");
+const UI = document.getElementById("ui-container");
+const gameOverText = document.getElementById("gameoverText");
 
 //const renderer = new UnlitRenderer(canvas);
 const renderer = new LambertRenderer(canvas);
@@ -77,11 +82,22 @@ const scene = level.loadScene(level.defaultScene);
 
 
 
-level.loadNode("Cube").isStatic = true;
-level.loadNode("Cube.001").isStatic = true;
-level.loadNode("Cube.002").isStatic = true;
-level.loadNode("Cube.003").isStatic = true;
+const wall1 = level.loadNode("Cube");
+wall1.isStatic = true;
+
+const wall2 = level.loadNode("Cube.001");
+wall2.isStatic = true;
+
+const wall3 = level.loadNode("Cube.002");
+wall3.isStatic = true;
+const wall4 = level.loadNode("Cube.003");
+wall4.isStatic = true;
+
 level.loadNode("Plane").isStatic = true;
+
+
+const walls = [wall1,wall2,wall3,wall4];
+
 
 const light = new Node();
 light.addComponent(new Light({direction: [2,6,1],ambientLight: [0.5,0.5,0.5]}));
@@ -186,15 +202,19 @@ const levels = [
   { level5: 5, number: 20, healthfactor: 2.5, speedfactor: 2.5 },
 ];
 let zombies = new Node();
-let spawner = new EnemySpawner(zombies,zombieRes,player);
+let spawner = new EnemySpawner(zombies,zombieRes,player,physics,walls);
 let levelindex = 0;
+let onWave = levelindex + 1;
 let n = 2;
 let startWave = false;
+
+export function initUI(){
+  UI.hidden = false;
+}
+
 export function initSound(){
-  console.log("sound on");
   const bgmusic = document.getElementById("bgMusic");
   
-
   const player = new SoundManager();
   player.setVolume(0.2);
   player.play(bgmusic);
@@ -202,8 +222,6 @@ export function initSound(){
 }
 export function inittLevel(index){
   levelindex = index - 1;
-  console.log("index: " + index);
-  console.log(levels[levelindex].number);
   if(levelindex < levels.length){
     spawner.spawn(levels[levelindex].number,levels[levelindex].healthfactor,levels[levelindex].speedfactor);
   }
@@ -211,9 +229,7 @@ export function inittLevel(index){
     console.log("given level does not exsist");
   }
 }
-console.log(levelindex);
 scene.addChild(zombies);
-
 scene.traverse((node) => {
   const model = node.getComponentOfType(Model);
   if (!model) {
@@ -236,7 +252,11 @@ function deleteZombie(index){
     },3000);
   }
 }
+
+let gameEnd = false;
+
 function update(t, dt) {
+  if (gameEnd) return;
   scene.traverse((node) => {
     for (const component of node.components) {
       component.update?.(t, dt);
@@ -250,11 +270,16 @@ function update(t, dt) {
       deleteZombie(index);
     }
   }
+
+  playerHP.innerHTML = "HP: " + player.getComponentOfType(Health).hp;
+
+  displayWave.innerHTML = "Wave: " + onWave;
+  physics.update(t, dt);
+
+
   if(player.getComponentOfType(Health).isDead){
-    console.log("player died game over");
-    
+    gameOver();
     player.removeComponent(PlayerMovement);
-    window.location.reload();
   }
   if(zombies.children.length == 0 && !startWave){
     startWave = true;
@@ -262,21 +287,21 @@ function update(t, dt) {
       n += 2; //increase zombie amount
       levelindex++;
       if(levelindex >= levels.length){
-        console.log("game has been won");
       }
       else {
         spawner.spawn(n,levels[levelindex].healthfactor,levels[levelindex].speedfactor);
       }
       startWave = false;
+      onWave++;
       
     },5000);
   }
-  
-  physics.update(t, dt);
 }
 
 function render() {
-  renderer.render(scene, camera);
+  if(gameEnd == false){
+    renderer.render(scene, camera);
+  }
 }
 
 function resize({ displaySize: { width, height } }) {
@@ -285,9 +310,16 @@ function resize({ displaySize: { width, height } }) {
 
 new ResizeSystem({ canvas, resize }).start();
 new UpdateSystem({ update, render }).start();
-function gamveOver(){
-  physics = null;
-  scene = null;
+function gameOver(){
+  gameOverText.hidden = false;
+  UI.hidden = true;
+  gameEnd = true;
+  const bgmusic = document.getElementById("bgMusic");
+  bgmusic.pause();
+  bgmusic.currentTime = 0;
+  setTimeout(() =>{
+    window.location.reload();
+  },4000);
 }
 //const gui = new GUI();
 //const controller = camera.getComponentOfType(FirstPersonController);
