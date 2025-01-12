@@ -20,6 +20,15 @@ import { SoundManager} from "./soundManger.js";
 let gunsound = new Audio("./audio/pistol.mp3");
 gunsound.preload = 'auto';
 gunsound.load();
+
+let reloadSound = new Audio("./audio/ReloadSound.mp3");
+reloadSound.preload = 'auto';
+reloadSound.load();
+
+let emptySound = new Audio("./audio/empyClip.mp3");
+emptySound.preload = 'auto';
+emptySound.load();
+
 const player = new SoundManager();
 export class Weapon {
   constructor(player, transform, playerControls, bulletRes, scene) {
@@ -31,6 +40,8 @@ export class Weapon {
 
     this.canFire = true;
     this.canReload = false;  // you can only reload after having shot at least one bullet
+    this.reloadDuration = 1200;
+    this.reloading = false;
 
     this.clipSize = 7;    // aka max number of bullets
     this.nofBullets = this.clipSize;  // current number of bullets
@@ -55,15 +66,15 @@ export class Weapon {
 
     if (this.playerControls.keys["Space"] && this.canFire) {
       if (this.nofBullets > 0) {
-        this.canFire = false;
         this.canReload = true;
 
         this.nofBullets -= 1;
         this.fire();
       }
-      else {
-        // play empty clip sound
+      else if(!this.reloading) {
+        player.play(emptySound, true);
       }
+      this.canFire = false;
     }
     if (!this.playerControls.keys["Space"]) {
       this.canFire = true;
@@ -71,9 +82,16 @@ export class Weapon {
 
     // reloading
     if (this.playerControls.keys["KeyR"] && this.canReload) {
-      this.nofBullets = this.clipSize;
-      this.canReload = false;
-      // play reload sound
+      //this.nofBullets = this.clipSize;
+      //this.canReload = false;
+      player.play(reloadSound, false);
+      this.reloading = true;
+
+      setTimeout(() => {
+        this.nofBullets = this.clipSize;
+        this.canReload = false;
+        this.reloading = false;
+    }, this.reloadDuration);
     }
   }
   fire() {
