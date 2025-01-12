@@ -19,7 +19,6 @@ export class Health {
     else{
       this.hp = newHP;
     }
-    console.log(this.hp);
   }
   die(){
       this.isDead = true;

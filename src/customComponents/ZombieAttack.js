@@ -58,16 +58,11 @@ export class ZombieAttack {
     vec3.normalize(knockbackdir,knockbackdir);
 
     this.player.translation = [
-      this.player.translation[0] += knockbackdir[0] * 2.5,
-      this.player.translation[1] += knockbackdir[1] * 2.5,
-      this.player.translation[2] += knockbackdir[2] * 2.5,
+      this.player.translation[0] += knockbackdir[0] * 0.2,
+      this.player.translation[1] += knockbackdir[1] * 0.2,
+      this.player.translation[2] += knockbackdir[2] * 0.2,
     ];
 
-    const playerVec = vec3.fromValues(
-      this.player.translation[0],
-      this.player.translation[1],
-      this.player.translation[2]
-    );
 
     this.playerHP.takeDMG(5);
   }

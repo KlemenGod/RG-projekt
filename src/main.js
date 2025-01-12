@@ -157,10 +157,12 @@ function generateGameScene(index) {
     ));
     */
    import('./main_2.js').then((main_2) => {
+    main_2.initUI();
     main_2.initSound();
     main_2.inittLevel(index);
 
     console.log("game loop started");
+    
    });
 }
 function generateMenuScene() {

@@ -5,9 +5,19 @@ export class SoundManager {
   constructor() {
     this.volume = 1;
   }
-  play(sound){
-    sound.volume = this.volume;
-    sound.play();
+  play(sound,clone){
+    
+    if(clone){
+      var cloneSound = sound.cloneNode();
+      cloneSound.volume = this.volume;
+      
+      cloneSound.play();
+
+    }
+    else {
+      sound.volume = this.volume;
+      sound.play();
+    }
     
   }
   pause(sound){

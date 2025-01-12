@@ -2,7 +2,11 @@ import { quat, vec3, mat4 } from "glm";
 import { Transform } from "../../engine/core/Transform.js";
 import { Health } from "./Health.js";
 import { RotateAnimator } from "../../engine/animators/RotateAnimator.js";
-
+import { SoundManager} from "./soundManger.js"
+let zombieSound = new Audio("./audio/zombie_growl.mp3");
+zombieSound.preload = 'auto';
+zombieSound.load();
+const player = new SoundManager();
 export class ZombieMovement {
   constructor(
     node,
@@ -30,15 +34,9 @@ export class ZombieMovement {
   }
 
   update(t, dt) {
-    // Calculate forward and right vectors.
-    const cos = Math.cos(this.yaw);
-    const sin = Math.sin(this.yaw);
-    const forward = [0, 0, 1];
-    const right = [1, 0, 0];
-    const offset = [-0.45, 0, -2.3];
-
-    const isDead = this.node.getComponentOfType(Health).isDead;
     
+    const isDead = this.node.getComponentOfType(Health).isDead;
+    player.play(zombieSound);
 
     // Map user input to the acceleration vector.
     const dir = vec3.create();
