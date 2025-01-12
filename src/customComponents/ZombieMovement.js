@@ -2,8 +2,10 @@ import { quat, vec3, mat4 } from "glm";
 import { Transform } from "../../engine/core/Transform.js";
 import { Health } from "./Health.js";
 import { RotateAnimator } from "../../engine/animators/RotateAnimator.js";
+import { ZombieAttack } from "./ZombieAttack.js";
 
 export class ZombieMovement {
+  deathPlayed = false;
   constructor(
     node,
     player,
@@ -26,7 +28,7 @@ export class ZombieMovement {
     this.maxSpeed = maxSpeed;
     this.decay = decay;
     this.targetPos = targetPos;
-    
+
   }
 
   update(t, dt) {
@@ -38,7 +40,7 @@ export class ZombieMovement {
     const offset = [-0.45, 0, -2.3];
 
     const isDead = this.node.getComponentOfType(Health).isDead;
-    
+
 
     // Map user input to the acceleration vector.
     const dir = vec3.create();
@@ -52,7 +54,7 @@ export class ZombieMovement {
     vec3.sub(dir, playerVec, this.transform.translation);
     vec3.normalize(dir, dir);
     vec3.scaleAndAdd(this.velocity, this.velocity, dir, dt * this.acceleration);
-    vec3.scale(this.velocity,this.velocity,this.speedfactor);
+    vec3.scale(this.velocity, this.velocity, this.speedfactor);
     if (vec3.distance(this.transform.translation, playerVec) <= 1.4) {
       this.velocity = [0, 0, 0];
     }
@@ -75,17 +77,31 @@ export class ZombieMovement {
     if (speed > this.maxSpeed) {
       vec3.scale(this.velocity, this.velocity, this.maxSpeed / speed);
     }
-    if(isDead){
+    if (isDead) {
       //this.transform.rotation = [-0.7071,0,0,0.7071];
-      this.node.addComponent(new RotateAnimator(this.node),{
-        startRotation: [-0.7071, 0, 0, 0],
-        endRotation: [0.7071, 0, 0.7071, 0],
-        duration: 5,
-      });
-      
-      this.transform.translation[1] += 0.2;
+      if (!this.deathPlayed) {
+        //samo enkrat
+        this.deathPlayed = true;
+
+        this.node.addComponent(
+          new RotateAnimator(this.node, {
+            startRotation: this.transform.rotation,
+            duration: 1,
+            startTime: t,
+          })
+        );
+        quat.setAxisAngle(
+          this.node.getComponentOfType(RotateAnimator).endRotation,
+          dir,
+          Math.PI / 2
+        );
+        //this.node.getComponentOfType(RotateAnimator).play();
+      }
+
+      //this.transform.translation[1] += 0.2;
 
       this.node.removeComponentsOfType(ZombieMovement);
+      this.node.removeComponentsOfType(ZombieAttack);
     }
   }
 }
