@@ -56,7 +56,7 @@ export class GameUI
         const title = document.createElement("h1");
         title.style.fontSize = "15vh";
         title.style.color = "white";
-        title.textContent = "Škatla Glava";
+        title.textContent = "ŠKATLOGLAVEC";
         mainMenu.appendChild(title);
 
         const levelSelectDiv = document.createElement("div");
